@@ -1,0 +1,13 @@
+{
+  "name": "storyable",
+  "version": "0.1.0",
+  "description": "A story manager",
+  "license": "AGPLv3",
+  "main": "./dist/main/main.js",
+  "scripts": {
+    "electron-rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
+    "postinstall": "npm run electron-rebuild && npm run link-modules",
+    "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
+  },
+  "dependencies": {}
+}
