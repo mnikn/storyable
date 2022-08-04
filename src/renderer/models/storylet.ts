@@ -1,0 +1,76 @@
+import { generateUUID } from '../utils/uuid';
+import { Node, Tree } from './base/tree';
+
+// base node
+export interface StoryletNodeData {
+  type: string;
+}
+export class StoryletNode<T extends StoryletNodeData> extends Node<T> {}
+
+// sentence node
+export interface StoryletSentenceNodeData extends StoryletNodeData {
+  content: string;
+}
+export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData> {
+  constructor() {
+    super();
+    this.data = {
+      type: 'sentence',
+      content: '',
+    };
+  }
+}
+
+// branch node
+export interface StoryletBranchNodeData extends StoryletNodeData {
+  content: string;
+  options: {
+    id: string;
+    name: string;
+  }[];
+}
+export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
+  constructor() {
+    super();
+    this.data = {
+      type: 'branch',
+      content: '',
+      options: [],
+    };
+  }
+}
+
+export enum ActionType {
+  Unknown = 'unknown',
+  SwitchToMatchStorylet = 'switch_to_match_storylet',
+}
+
+// action node
+export interface StoryletActionNodeData extends StoryletNodeData {
+  actionType: string;
+}
+export abstract class StoryletActionNode extends StoryletNode<StoryletActionNodeData> {
+  constructor() {
+    super();
+    this.data = {
+      type: 'action',
+      actionType: ActionType.Unknown,
+    };
+  }
+}
+
+export interface StoryletSwitchToMatchStoryletActionNodeData
+  extends StoryletActionNodeData {}
+export class StoryletSwitchToMatchStoryletActionNode extends StoryletNode<StoryletSwitchToMatchStoryletActionNodeData> {
+  constructor() {
+    super();
+    if (this.data) {
+      this.data.actionType = ActionType.SwitchToMatchStorylet;
+    }
+  }
+}
+
+export class Storylet extends Tree<StoryletNode<any>> {
+  public id: string = generateUUID();
+  public conditions: any[] = [];
+}
