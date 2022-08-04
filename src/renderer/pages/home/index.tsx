@@ -1,15 +1,17 @@
-import * as d3 from 'd3';
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
+import Link from './components/link';
+import NodeCard from './components/node_card';
+import Sidebar from './sidebar';
 import useView from './use_view';
 
 function Home() {
-  const [zoomDom, setZoomDom] = useState<HTMLDivElement>(null);
+  const [zoomDom, setZoomDom] = useState<HTMLDivElement | null>(null);
 
   const { treeData, linkData } = useView({
     zoomDom,
   });
 
-  const onDomMounted = useCallback((dom) => {
+  const onDomMounted = useCallback((dom: HTMLDivElement) => {
     if (dom) {
       setZoomDom(dom);
     }
@@ -17,28 +19,55 @@ function Home() {
 
   return (
     <div className="flex h-full">
-      <div className="bg-gray-50 w-72"></div>
+      <Sidebar />
       <div
         id="main-content"
-        className="flex-grow bg-gray-600"
+        className="flex-grow bg-gray-600 relative"
         style={{ overflow: 'hidden' }}
       >
-        <div ref={onDomMounted} className="h-full w-full">
-          <div id="nodes" className="relative h-full w-full">
+        <div ref={onDomMounted} className="absolute h-full w-full">
+          <div id="nodes" className="absolute h-full w-full">
             {treeData.map((item) => {
               return (
                 <div key={item.id}>
                   <>
-                    <div
-                      className="absolute bg-red-400"
-                      style={{
-                        transform: `translate(${item.y0}px,${item.x0}px)`,
-                        height: '100px',
-                        width: '100px',
+                    <NodeCard
+                      pos={{
+                        x: item.x0,
+                        y: item.y0,
                       }}
                     />
                   </>
                 </div>
+              );
+            })}
+          </div>
+
+          <svg
+            id="dialogue-tree-links-container"
+            className="absolute w-full h-full"
+            style={{
+              overflow: 'inherit',
+              pointerEvents: 'none',
+            }}
+          />
+
+          <div
+            id="connections"
+            className="absolute w-full h-full "
+            style={{
+              overflow: 'inherit',
+              pointerEvents: 'none',
+            }}
+          >
+            {linkData.map((item) => {
+              return (
+                <Link
+                  key={item.from.data.id + '-' + item.target.data.id}
+                  from={item.from}
+                  target={item.target}
+                  linkData={item.data}
+                />
               );
             })}
           </div>

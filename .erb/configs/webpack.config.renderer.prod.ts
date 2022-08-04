@@ -104,6 +104,11 @@ const configuration: webpack.Configuration = {
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
     }),
+    new webpack.DefinePlugin({
+      'process.env': {
+        RUN_ENV: JSON.stringify('production'),
+      },
+    }),
 
     new HtmlWebpackPlugin({
       filename: 'index.html',

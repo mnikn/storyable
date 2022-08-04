@@ -4,25 +4,6 @@ export function formatNodeLinkId(from: string, target: string) {
   return `${from}-${target}`;
 }
 
-export function createTree(json: any): Tree<any> {
-  const instance = new Tree();
-  instance.nodes = Object.keys(json.nodes).reduce((res: any, k: string) => {
-    res[k] = Node.fromJson(json.nodes[k]);
-    return res;
-  }, {});
-
-  instance.links = Object.keys(json.links).reduce((res: any, k: string) => {
-    const data = json.links[k];
-    const source = instance.nodes[data.sourceId];
-    const target = instance.nodes[data.targetId];
-    const link = new NodeLink(source, target);
-    link.data = data.data;
-    res[k] = link;
-    return res;
-  }, {});
-  return instance;
-}
-
 // link
 export interface NodeLinkData {
   [key: string]: any;
@@ -66,7 +47,11 @@ export interface NodeJsonData {
 export class Node<T> {
   public id = `node_${generateUUID()}`;
 
-  public data: T | null = null;
+  public data: T;
+
+  constructor() {
+    this.data = {} as T;
+  }
 
   public toJson(): any {
     return {
@@ -182,5 +167,24 @@ export class Tree<T> {
         return res;
       }, {}),
     };
+  }
+
+  public static fromJson(json: any): Tree<any> {
+    const instance = new Tree();
+    instance.nodes = Object.keys(json.nodes).reduce((res: any, k: string) => {
+      res[k] = Node.fromJson(json.nodes[k]);
+      return res;
+    }, {});
+
+    instance.links = Object.keys(json.links).reduce((res: any, k: string) => {
+      const data = json.links[k];
+      const source = instance.nodes[data.sourceId];
+      const target = instance.nodes[data.targetId];
+      const link = new NodeLink(source, target);
+      link.data = data.data;
+      res[k] = link;
+      return res;
+    }, {});
+    return instance;
   }
 }

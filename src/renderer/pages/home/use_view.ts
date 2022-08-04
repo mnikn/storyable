@@ -141,11 +141,13 @@ function useView({ zoomDom }: { zoomDom: HTMLElement | null }) {
 
     const elm = document.querySelector('#main-content');
     d3.select(elm).call(
-      /* d3.select(container).call( */
       /* eslint-disable func-names */
       (d3 as any).zoom().on('zoom', function () {
         const transfromRes = d3.zoomTransform(this);
         /* owner.zoom = transfromRes.k; */
+        // style={{
+        //   transform: 'translate(0, 30%) scale(0.5)',
+        // }}
         d3.select(zoomDom).style(
           'transform',
           `translate(${transfromRes.x}px,${transfromRes.y}px) scale(${transfromRes.k})`

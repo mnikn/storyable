@@ -2,7 +2,6 @@ import {
   Tree,
   Node,
   formatNodeLinkId,
-  createTree,
 } from '../../../renderer/models/base/tree';
 
 describe('model tree', () => {
@@ -74,7 +73,7 @@ describe('model tree', () => {
         },
       },
     };
-    const instance = createTree(json);
+    const instance = Tree.fromJson(json);
     expect(JSON.stringify(instance.toJson())).toEqual(JSON.stringify(json));
   });
 });

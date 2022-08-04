@@ -1,5 +1,6 @@
 import { MemoryRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
+import 'react-contexify/dist/ReactContexify.css';
 import Home from './pages/home';
 
 export default function App() {

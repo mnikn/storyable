@@ -5,7 +5,7 @@ import { Node, Tree } from './base/tree';
 export interface StoryletNodeData {
   type: string;
 }
-export class StoryletNode<T extends StoryletNodeData> extends Node<T> {}
+export class StoryletNode<D extends StoryletNodeData> extends Node<D> {}
 
 // sentence node
 export interface StoryletSentenceNodeData extends StoryletNodeData {
@@ -70,7 +70,8 @@ export class StoryletSwitchToMatchStoryletActionNode extends StoryletNode<Storyl
   }
 }
 
-export class Storylet extends Tree<StoryletNode<any>> {
+export class Storylet extends Tree<StoryletNodeData> {
   public id: string = generateUUID();
+  public name: string = '';
   public conditions: any[] = [];
 }
