@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import {
   Menu,
@@ -14,24 +15,111 @@ import {
   CgChevronDown,
   CgFile,
 } from 'react-icons/cg';
+import Dialog from 'renderer/components/dialog';
 import { StoryletGroup } from 'renderer/models/story';
 import { Storylet } from 'renderer/models/storylet';
 import useEventState from 'renderer/utils/use_event_state';
 import StoryProvider from '../../services/story_provider';
+import eventBus, { Event } from './event';
+
+function RenameDialog() {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [item, setItem] = useState<Storylet | StoryletGroup | null>(null);
+  useEffect(() => {
+    const showDialog = (data: Storylet | StoryletGroup) => {
+      setOpen(true);
+      setItem(data);
+      setName(data.name);
+    };
+    eventBus.on(Event.SHOW_SIDEBAR_RENAME_DIALOG, showDialog);
+    return () => {
+      eventBus.off(Event.SHOW_SIDEBAR_RENAME_DIALOG, showDialog);
+    };
+  }, []);
+  return (
+    <Dialog
+      open={open}
+      onClose={() => {
+        setOpen(false);
+      }}
+      title="Rename"
+    >
+      <div className="flex flex-row items-center w-full mb-2">
+        <div className="font-bold mr-2">Name:</div>
+        <input
+          type="text"
+          className="flex-grow border-2 border-gray-300 p-2 rounded-md focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+          placeholder="Please enter the name..."
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
+        />
+      </div>
+      <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button
+          type="button"
+          className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+          onClick={() => {
+            if (item instanceof Storylet) {
+              item.name = name;
+              StoryProvider.updateStorylet(item);
+            } else if (item instanceof StoryletGroup) {
+              item.name = name;
+              StoryProvider.updateStoryletGroup(item);
+            }
+            setOpen(false);
+          }}
+        >
+          Confirm
+        </button>
+        <button
+          type="button"
+          className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+          onClick={() => setOpen(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </Dialog>
+  );
+}
 
 const MENU_ID = 'sidebar-menu';
 
 function StoryletItem({
   level,
   storylet,
+  showContextMenu,
 }: {
   level: number;
   storylet: Storylet;
+  showContextMenu: (
+    e: any,
+    type: 'group' | 'storylet',
+    currentItem: Storylet | StoryletGroup
+  ) => void;
 }) {
+  const currentStorylet = useEventState<Storylet>({
+    event: StoryProvider.event,
+    property: 'currentStorylet',
+    initialVal: StoryProvider.currentStorylet || undefined,
+  });
   return (
     <div
-      className="flex items-center hover:bg-gray-500 hover:text-white rounded-xl p-1 cursor-pointer transition-all select-none"
-      style={{ marginLeft: `${level * 15}px` }}
+      className={classNames(
+        'flex items-center hover:bg-gray-500 hover:text-white rounded-xl p-1 cursor-pointer transition-all select-none',
+        { 'bg-gray-500 text-white': currentStorylet?.id === storylet.id }
+      )}
+      style={{ marginLeft: `${level * 20}px` }}
+      onContextMenu={(e) => {
+        e.stopPropagation();
+        showContextMenu(e, 'storylet', storylet);
+      }}
+      onClick={() => {
+        StoryProvider.changeCurrentStorylet(storylet.id);
+      }}
     >
       <CgFile className="mr-4 p-0.5 text-xl" />
       <div>{storylet.name}</div>
@@ -44,11 +132,17 @@ function TreeItem({
   expandedInfo,
   group,
   toggleExpaned,
+  showContextMenu,
 }: {
   level: number;
   expandedInfo: { [key: string]: boolean };
   group: StoryletGroup;
   toggleExpaned: (data: StoryletGroup) => void;
+  showContextMenu: (
+    e: any,
+    type: 'group' | 'storylet',
+    currentItem: Storylet | StoryletGroup
+  ) => void;
 }) {
   const expanded = expandedInfo[group.id];
   const storylets = useEventState<{ group: StoryletGroup; data: Storylet }[]>({
@@ -64,6 +158,10 @@ function TreeItem({
     <div
       className="flex flex-col select-none	"
       style={{ marginLeft: `${level * 15}px` }}
+      onContextMenu={(e) => {
+        e.stopPropagation();
+        showContextMenu(e, 'group', group);
+      }}
     >
       <div
         className="flex items-center mb-2 hover:bg-gray-300 rounded-xl cursor-pointer p-1 transition-all"
@@ -79,23 +177,32 @@ function TreeItem({
         group.children.map((g2) => {
           return (
             <TreeItem
+              key={g2.id}
               group={g2}
               level={level + 1}
               expandedInfo={expandedInfo}
               toggleExpaned={toggleExpaned}
+              showContextMenu={showContextMenu}
             />
           );
         })}
       {expanded &&
         currentGroupStorylets.map((s) => {
-          return <StoryletItem storylet={s.data} level={level + 1} />;
+          return (
+            <StoryletItem
+              key={s.data.id}
+              storylet={s.data}
+              level={level + 1}
+              showContextMenu={showContextMenu}
+            />
+          );
         })}
     </div>
   );
 }
 
 function Sidebar() {
-  const { show: showContextMenu } = useContextMenu({
+  const { show: showMenu } = useContextMenu({
     id: MENU_ID,
   });
   const groups = useEventState<StoryletGroup[]>({
@@ -103,6 +210,11 @@ function Sidebar() {
     property: 'storyletGroups',
     initialVal: StoryProvider.storyletGroups,
   });
+
+  const [menuType, setMenuType] = useState<'storylet' | 'group'>('group');
+  const [menuTriggeredItem, setMenuTriggeredItem] = useState<
+    Storylet | StoryletGroup | null
+  >(null);
 
   const [expandedInfo, setExpandedInfo] = useState<{ [key: string]: boolean }>(
     {}
@@ -126,28 +238,28 @@ function Sidebar() {
     });
   }, [groups]);
 
-  const handleItemClick = ({ event, props, triggerEvent, data }) => {
-    console.log(event, props, triggerEvent, data);
-  };
-
   const addRootGroup = () => {
     StoryProvider.createStoryletGroup();
+  };
+
+  const addRootStorylet = () => {
+    StoryProvider.createStorylet();
   };
 
   return (
     <div className="bg-gray-50 w-72 flex flex-col items-center p-5">
       <div className="text-xl font-bold mb-4">Storylets</div>
       <div className="flex ml-auto mb-2">
-        <CgMathPlus className="cursor-pointer hover:bg-gray-500 hover:rounded-full p-0.5 text-2xl transition-all" />
+        <CgMathPlus
+          className="cursor-pointer hover:bg-gray-500 hover:rounded-full p-0.5 text-2xl transition-all"
+          onClick={addRootStorylet}
+        />
         <CgFolderAdd
           className="ml-2 cursor-pointer hover:bg-gray-500 hover:rounded-full p-0.5 text-2xl transition-all"
           onClick={addRootGroup}
         />
       </div>
-      <div
-        className="flex-grow w-full overflow-auto"
-        onContextMenu={showContextMenu}
-      >
+      <div className="flex-grow w-full overflow-auto">
         {(groups || []).map((group) => {
           return (
             <TreeItem
@@ -163,21 +275,70 @@ function Sidebar() {
                   };
                 });
               }}
+              showContextMenu={(e, type, item) => {
+                showMenu(e);
+                setMenuTriggeredItem(item);
+                setMenuType(type);
+              }}
             />
           );
         })}
       </div>
       <Menu id={MENU_ID}>
-        <Item onClick={handleItemClick}>Item 1</Item>
-        <Item onClick={handleItemClick}>Item 2</Item>
-        <Separator />
-        <Item disabled>Disabled</Item>
-        <Separator />
-        <Submenu label="Submenu">
-          <Item onClick={handleItemClick}>Sub Item 1</Item>
-          <Item onClick={handleItemClick}>Sub Item 2</Item>
-        </Submenu>
+        {menuType === 'group' && (
+          <>
+            <Item
+              onClick={() => {
+                StoryProvider.createStorylet(
+                  menuTriggeredItem as StoryletGroup
+                );
+              }}
+            >
+              New storylet
+            </Item>
+            {menuTriggeredItem?.id !== (groups || [])[0]?.id && (
+              <>
+                <Separator />
+                <Item
+                  onClick={() => {
+                    StoryProvider.createStoryletGroup(
+                      menuTriggeredItem as StoryletGroup
+                    );
+                  }}
+                >
+                  New group
+                </Item>
+              </>
+            )}
+          </>
+        )}
+        {menuTriggeredItem?.id !== (groups || [])[0]?.id && (
+          <>
+            <Item
+              onClick={() => {
+                eventBus.emit(
+                  Event.SHOW_SIDEBAR_RENAME_DIALOG,
+                  menuTriggeredItem
+                );
+              }}
+            >
+              Rename
+            </Item>
+            <Item
+              onClick={() => {
+                if (menuTriggeredItem instanceof Storylet) {
+                  StoryProvider.removeStorylet(menuTriggeredItem.id);
+                } else if (menuTriggeredItem instanceof StoryletGroup) {
+                  StoryProvider.removeStoryletGroup(menuTriggeredItem.id);
+                }
+              }}
+            >
+              Delete
+            </Item>
+          </>
+        )}
       </Menu>
+      <RenameDialog />
     </div>
   );
 }

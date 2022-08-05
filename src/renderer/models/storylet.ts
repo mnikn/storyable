@@ -1,11 +1,29 @@
 import { generateUUID } from '../utils/uuid';
 import { Node, Tree } from './base/tree';
 
+export enum NodeType {
+  Init = 'init',
+  Sentence = 'sentence',
+  Branch = 'branch',
+  Action = 'action',
+}
+
 // base node
 export interface StoryletNodeData {
-  type: string;
+  type: NodeType;
 }
 export class StoryletNode<D extends StoryletNodeData> extends Node<D> {}
+
+// init node
+export interface StoryletInitNodeData extends StoryletNodeData {}
+export class StoryletInitNode extends StoryletNode<StoryletInitNodeData> {
+  constructor() {
+    super();
+    this.data = {
+      type: NodeType.Init,
+    };
+  }
+}
 
 // sentence node
 export interface StoryletSentenceNodeData extends StoryletNodeData {
@@ -15,7 +33,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
   constructor() {
     super();
     this.data = {
-      type: 'sentence',
+      type: NodeType.Sentence,
       content: '',
     };
   }
@@ -33,7 +51,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
   constructor() {
     super();
     this.data = {
-      type: 'branch',
+      type: NodeType.Branch,
       content: '',
       options: [],
     };
@@ -53,7 +71,7 @@ export abstract class StoryletActionNode extends StoryletNode<StoryletActionNode
   constructor() {
     super();
     this.data = {
-      type: 'action',
+      type: NodeType.Action,
       actionType: ActionType.Unknown,
     };
   }
@@ -74,4 +92,20 @@ export class Storylet extends Tree<StoryletNodeData> {
   public id: string = generateUUID();
   public name: string = '';
   public conditions: any[] = [];
+
+  constructor() {
+    super();
+    const node = new StoryletInitNode();
+    this.upsertNode(node);
+  }
+
+  public clone(): Storylet {
+    const instance = new Storylet();
+    instance.id = this.id;
+    instance.name = this.name;
+    instance.conditions = this.conditions;
+    instance.nodes = this.nodes;
+    instance.links = this.links;
+    return instance;
+  }
 }

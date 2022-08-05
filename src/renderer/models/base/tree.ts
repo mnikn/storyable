@@ -169,6 +169,41 @@ export class Tree<T> {
     };
   }
 
+  public toHierarchyJson(): any[] {
+    const rootNodes = Object.values(this.nodes).filter((item) => {
+      const isSource =
+        Object.values(this.links).length === 0 ||
+        Object.values(this.links).find((item2) => item2.source.id === item.id);
+      const notTarget = !Object.values(this.links).find(
+        (item2) => item2.target.id === item.id
+      );
+      return isSource && notTarget;
+    });
+
+    const json = rootNodes.map((item) => {
+      return this.buildHierarchy(item, Object.values(this.links));
+    });
+    return json;
+  }
+
+  private buildHierarchy(node: any, links: any[]) {
+    const children: any[] = Object.values(links)
+      .filter((item) => item.source.id === node.id)
+      .map((item) => {
+        return {
+          id: item.target.id,
+          children: [] as any[],
+        };
+      })
+      .map((child) => {
+        return this.buildHierarchy(child, links);
+      });
+    return {
+      id: node.id,
+      children,
+    };
+  }
+
   public static fromJson(json: any): Tree<any> {
     const instance = new Tree();
     instance.nodes = Object.keys(json.nodes).reduce((res: any, k: string) => {
@@ -185,6 +220,13 @@ export class Tree<T> {
       res[k] = link;
       return res;
     }, {});
+    return instance;
+  }
+
+  public clone(): Tree<T> {
+    const instance = new Tree<T>();
+    instance.nodes = this.nodes;
+    instance.links = this.links;
     return instance;
   }
 }
