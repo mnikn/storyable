@@ -9,7 +9,8 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import fs from 'fs';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { resolveHtmlPath } from './util';
@@ -28,6 +29,26 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.on('saveFile', async (event, arg = {}) => {
+  if (!mainWindow) {
+    return;
+  }
+  let filePath = arg.path;
+  if (!filePath) {
+    filePath = dialog.showSaveDialogSync(mainWindow, {
+      filters: [{ name: 'Data', extensions: arg.extensions || [] }],
+    });
+  }
+  if (filePath) {
+    fs.writeFileSync(filePath, arg.data);
+    const data = {
+      res: { filePath },
+      arg,
+    };
+    event.reply('saveJsonFile', data);
+  }
 });
 
 if (process.env.NODE_ENV === 'production') {

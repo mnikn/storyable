@@ -152,7 +152,7 @@ export class Tree<T> {
     });
 
     return matchLinkIds.map((linkId) => {
-      return this.links[linkId].source;
+      return this.links[linkId].target;
     });
   }
 
