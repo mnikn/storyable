@@ -2,40 +2,35 @@ import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import Dialog from 'renderer/components/dialog';
 import {
-  StoryletBranchNode,
-  StoryletBranchNodeData,
+  StoryletInitNode,
+  StoryletInitNodeData,
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
 import eventBus, { Event } from '../event';
 import ConditionPanel from './condition_panel';
-import ActorPart from './edit_dialog/actor_part';
 
 enum Tab {
   BaseConfig = 'Base config',
   ExtraData = 'Extra data',
 }
 
-function BranchEditDialog() {
+function RootEditDialog() {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<StoryletBranchNodeData | null>(null);
-  const [sourceNode, setSourceNode] = useState<StoryletBranchNode | null>(null);
+  const [form, setForm] = useState<StoryletInitNodeData | null>(null);
+  const [sourceNode, setSourceNode] = useState<StoryletInitNode | null>(null);
   const [currentTab, setCurrentTab] = useState<Tab>(Tab.BaseConfig);
 
   useEffect(() => {
-    const showDialog = (data: StoryletBranchNode) => {
+    const showDialog = (data: StoryletInitNode) => {
       setOpen(true);
       setForm({
         ...data.data,
-        content:
-          StoryProvider.translations[data.data.content]?.[
-            StoryProvider.currentLang
-          ],
       });
       setSourceNode(data);
     };
-    eventBus.on(Event.SHOW_BRANCH_EDIT_DIALOG, showDialog);
+    eventBus.on(Event.SHOW_ROOT_EDIT_DIALOG, showDialog);
     return () => {
-      eventBus.off(Event.SHOW_BRANCH_EDIT_DIALOG, showDialog);
+      eventBus.off(Event.SHOW_ROOT_EDIT_DIALOG, showDialog);
     };
   }, []);
 
@@ -44,36 +39,7 @@ function BranchEditDialog() {
     content = (
       <>
         {form && (
-          <div className="w-full flex flex-col p-2 h-86 overflow-auto">
-            <ActorPart
-              form={form}
-              onChange={() => {
-                setForm((prev: any) => {
-                  return { ...prev };
-                });
-              }}
-            />
-            <div className="block mb-5">
-              <div className="text-md text-black mb-2 font-bold">Content</div>
-              <textarea
-                autoFocus
-                className="resize-none text-md font-normal w-full h-32 outline-none border border-gray-300 rounded-md p-4 focus:ring-blue-500 focus:border-blue-500"
-                style={{ background: 'none' }}
-                value={form.content}
-                onChange={(e) => {
-                  setForm((prev) => {
-                    if (!prev) {
-                      return prev;
-                    }
-                    return {
-                      ...prev,
-                      content: e.target.value,
-                    };
-                  });
-                }}
-              />
-            </div>
-
+          <div className="w-full flex flex-col p-2 flex-grow">
             <ConditionPanel
               conditions={form.enableConditions}
               onChange={(val) => {
@@ -96,21 +62,9 @@ function BranchEditDialog() {
               setOpen(false);
               eventBus.emit(Event.CLOSE_DIALOG);
               if (sourceNode && form) {
-                const newTranslations = { ...StoryProvider.translations };
-                if (!newTranslations[sourceNode.data.content]) {
-                  newTranslations[sourceNode.data.content] = {
-                    [StoryProvider.currentLang]: form.content,
-                  };
-                } else {
-                  newTranslations[sourceNode.data.content][
-                    StoryProvider.currentLang
-                  ] = form.content;
-                }
                 sourceNode.data = {
                   ...form,
-                  content: sourceNode.data.content,
                 };
-                StoryProvider.updateTranslations(newTranslations);
                 StoryProvider.updateStoryletNode(sourceNode);
               }
             }}
@@ -138,7 +92,7 @@ function BranchEditDialog() {
       onClose={() => {
         setOpen(false);
       }}
-      title="Edit branch"
+      title="Edit sentence"
     >
       <div className="w-full flex flex-col p-2" style={{ height: '650px' }}>
         <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400 mb-5">
@@ -171,4 +125,4 @@ function BranchEditDialog() {
   );
 }
 
-export default BranchEditDialog;
+export default RootEditDialog;

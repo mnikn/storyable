@@ -67,25 +67,23 @@ function NodeActionMenu({
         </>
       )}
 
-      {!(sourceNode instanceof StoryletInitNode) && (
-        <>
-          <div className="ml-2 mr-2 bg-gray-500 h-4/5 w-0.5" />
-          <button
-            className="pl-2 pr-2 text-base hover:bg-gray-300 rounded-sm transition-all h-full flex items-center"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (sourceNode instanceof StoryletSentenceNode) {
-                eventBus.emit(Event.SHOW_SENTENCE_EDIT_DIALOG, sourceNode);
-              } else if (sourceNode instanceof StoryletBranchNode) {
-                eventBus.emit(Event.SHOW_BRANCH_EDIT_DIALOG, sourceNode);
-              }
-            }}
-          >
-            <CgPen className="font-bold text-xl" />
-          </button>
-        </>
-      )}
+      <div className="ml-2 mr-2 bg-gray-500 h-4/5 w-0.5" />
+      <button
+        className="pl-2 pr-2 text-base hover:bg-gray-300 rounded-sm transition-all h-full flex items-center"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (sourceNode instanceof StoryletSentenceNode) {
+            eventBus.emit(Event.SHOW_SENTENCE_EDIT_DIALOG, sourceNode);
+          } else if (sourceNode instanceof StoryletBranchNode) {
+            eventBus.emit(Event.SHOW_BRANCH_EDIT_DIALOG, sourceNode);
+          } else if (sourceNode instanceof StoryletInitNode) {
+            eventBus.emit(Event.SHOW_ROOT_EDIT_DIALOG, sourceNode);
+          }
+        }}
+      >
+        <CgPen className="font-bold text-xl" />
+      </button>
 
       <div className="ml-2 mr-2 bg-gray-500 h-4/5 w-0.5" />
     </div>

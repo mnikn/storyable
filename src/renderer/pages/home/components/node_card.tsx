@@ -1,4 +1,5 @@
 import { StoryletGroup } from 'renderer/models/story';
+import * as d3 from 'd3';
 import {
   NodeType,
   Storylet,
@@ -13,15 +14,18 @@ import StoryProvider from 'renderer/services/story_provider';
 import eventBus, { Event } from '../event';
 import Context from '../context';
 import classNames from 'classnames';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import NodeActionMenu from './node_action_menu';
+import { EVENT } from 'react-contexify/dist/constants';
 
 function NodeCard({
   pos,
   nodeId,
+  data,
 }: {
   pos: { x: number; y: number };
   nodeId: string;
+  data: any;
 }) {
   const currentStorylet = useEventState<Storylet>({
     event: StoryProvider.event,
@@ -38,8 +42,13 @@ function NodeCard({
     property: 'currentLang',
     initialVal: StoryProvider.currentLang,
   });
+  const projectSettings = useEventState<any>({
+    event: StoryProvider.event,
+    property: 'projectSettings',
+    initialVal: StoryProvider.projectSettings,
+  });
 
-  const { selectingNode, isQuickEditing } = useContext(Context);
+  const { selectingNode, isQuickEditing, dragingNode } = useContext(Context);
   const nodeData = currentStorylet?.nodes[nodeId];
 
   const [quickEditContent, setQuickEditContent] = useState('');
@@ -169,6 +178,21 @@ function NodeCard({
     }
   }, [nodeData]);
 
+  const dragListen = useCallback(
+    (dom: any) => {
+      const dragListener = d3
+        .drag()
+        .on('drag', (d) => {
+          eventBus.emit(Event.DRAG_NODE, d, data);
+        })
+        .on('end', (d) => {
+          eventBus.emit(Event.END_DRAG_NODE, d);
+        });
+      dragListener(d3.select(dom));
+    },
+    [selectingNode, nodeId]
+  );
+
   if (!nodeData) {
     return null;
   }
@@ -179,7 +203,7 @@ function NodeCard({
       {nodeData instanceof StoryletInitNode && (
         <div
           className={classNames(
-            'absolute bg-amber-400 rounded-xl p-4 text-3xl flex items-center justify-center font-bold hover:bg-amber-200 cursor-pointer transition-all',
+            'absolute bg-amber-400 rounded-xl p-4 text-3xl flex items-center justify-center font-bold hover:bg-amber-200 cursor-pointer transition-all select-none',
             {
               'bg-amber-200': isSelecting,
             }
@@ -188,21 +212,27 @@ function NodeCard({
             transform: `translate(${pos.y}px,${pos.x}px)`,
             height: '200px',
             width: '400px',
-            zIndex: isSelecting ? '100' : '1',
+            zIndex: isSelecting ? '2' : '1',
           }}
           onClick={(e) => {
             e.stopPropagation();
+            if (dragingNode) {
+              return;
+            }
             eventBus.emit(Event.SELECT_NODE, nodeData.id);
           }}
         >
           {currentStorylet.name}
-          <NodeActionMenu visible={isSelecting} sourceNode={nodeData} />
+          <NodeActionMenu
+            visible={isSelecting && !dragingNode}
+            sourceNode={nodeData}
+          />
         </div>
       )}
       {nodeData instanceof StoryletSentenceNode && (
         <div
           className={classNames(
-            'absolute bg-green-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-green-200 cursor-pointer transition-all',
+            'absolute bg-green-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-green-200 cursor-pointer transition-all select-none',
             {
               'bg-green-200': isSelecting,
             }
@@ -210,8 +240,8 @@ function NodeCard({
           style={{
             transform: `translate(${pos.y}px,${pos.x}px)`,
             height: '200px',
-            width: '400px',
-            zIndex: isSelecting ? '100' : '1',
+            width: '500px',
+            zIndex: isSelecting ? '2' : '1',
           }}
           onClick={(e) => {
             e.stopPropagation();
@@ -221,13 +251,36 @@ function NodeCard({
             }
             eventBus.emit(Event.SELECT_NODE, nodeData.id);
           }}
+          ref={dragListen}
         >
           {(!isQuickEditing || !isSelecting) && (
-            <div
-              className="resize-none text-md font-normal overflow-hidden cursor-pointer text-ellipsis"
-              style={{ whiteSpace: 'nowrap' }}
-            >
-              {translations[nodeData.data.content]?.[currentLang]}
+            <div className="flex cursor-pointer h-full overflow-hidden">
+              {nodeData.data.actor && (
+                <img
+                  className="mr-5 object-contain m-auto bg-gray-800 rounded-md"
+                  src={
+                    (
+                      projectSettings.actors.find(
+                        (item: any) => item.id === nodeData.data.actor
+                      )?.portraits || []
+                    ).find((p: any) => p.id === nodeData.data.actorPortrait)
+                      ?.pic || ''
+                  }
+                  alt=""
+                  style={{ width: '100px', height: '100px' }}
+                />
+              )}
+              <div
+                className="resize-none text-md font-normal overflow-hidden text-ellipsis"
+                style={{
+                  lineClamp: 3,
+                  display: '-webkit-box',
+                  overflow: 'hidden',
+                  boxOrient: 'vertical',
+                }}
+              >
+                {translations[nodeData.data.content]?.[currentLang]}
+              </div>
             </div>
           )}
           {isQuickEditing && isSelecting && (
@@ -248,14 +301,17 @@ function NodeCard({
               }}
             />
           )}
-          <NodeActionMenu visible={isSelecting} sourceNode={nodeData} />
+          <NodeActionMenu
+            visible={isSelecting && !dragingNode}
+            sourceNode={nodeData}
+          />
         </div>
       )}
 
       {nodeData instanceof StoryletBranchNode && (
         <div
           className={classNames(
-            'absolute bg-blue-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-blue-200 cursor-pointer transition-all',
+            'absolute bg-blue-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-blue-200 cursor-pointer transition-all select-none',
             {
               'bg-blue-200': isSelecting,
             }
@@ -263,21 +319,44 @@ function NodeCard({
           style={{
             transform: `translate(${pos.y}px,${pos.x}px)`,
             height: '200px',
-            width: '400px',
-            zIndex: isSelecting ? '100' : '1',
+            width: '500px',
+            zIndex: isSelecting ? '2' : '1',
           }}
           onClick={(e) => {
             e.stopPropagation();
             eventBus.emit(Event.QUICK_EDIT_END);
             eventBus.emit(Event.SELECT_NODE, nodeData.id);
           }}
+          ref={dragListen}
         >
           {(!isQuickEditing || !isSelecting) && (
-            <div
-              className="resize-none text-md font-normal overflow-hidden cursor-pointer text-ellipsis"
-              style={{ whiteSpace: 'nowrap' }}
-            >
-              {translations[nodeData.data.content]?.[currentLang]}
+            <div className="flex cursor-pointer w-full h-full overflow-hidden">
+              {nodeData.data.actor && (
+                <img
+                  className="mr-5 object-contain bg-gray-800 rounded-md"
+                  src={
+                    (
+                      projectSettings.actors.find(
+                        (item: any) => item.id === nodeData.data.actor
+                      )?.portraits || []
+                    ).find((p: any) => p.id === nodeData.data.actorPortrait)
+                      ?.pic || ''
+                  }
+                  alt=""
+                  style={{ width: '100px', height: '100px' }}
+                />
+              )}
+              <div
+                className="resize-none text-md font-normal overflow-hidden text-ellipsis"
+                style={{
+                  lineClamp: 3,
+                  display: '-webkit-box',
+                  overflow: 'hidden',
+                  boxOrient: 'vertical',
+                }}
+              >
+                {translations[nodeData.data.content]?.[currentLang]}
+              </div>
             </div>
           )}
           {isQuickEditing && isSelecting && (
@@ -298,13 +377,16 @@ function NodeCard({
               }}
             />
           )}
-          <NodeActionMenu visible={isSelecting} sourceNode={nodeData} />
+          <NodeActionMenu
+            visible={isSelecting && !dragingNode}
+            sourceNode={nodeData}
+          />
         </div>
       )}
       {nodeData instanceof StoryletActionNode && (
         <div
           className={classNames(
-            'absolute bg-rose-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-blue-200 cursor-pointer transition-all',
+            'absolute bg-rose-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-blue-200 cursor-pointer transition-all select-none',
             {
               'bg-rose-200': isSelecting,
             }
@@ -313,15 +395,19 @@ function NodeCard({
             transform: `translate(${pos.y}px,${pos.x}px)`,
             height: '200px',
             width: '400px',
-            zIndex: isSelecting ? '100' : '1',
+            zIndex: isSelecting ? '2' : '1',
           }}
           onClick={(e) => {
             e.stopPropagation();
             eventBus.emit(Event.QUICK_EDIT_END);
             eventBus.emit(Event.SELECT_NODE, nodeData.id);
           }}
+          ref={dragListen}
         >
-          <NodeActionMenu visible={isSelecting} sourceNode={nodeData} />
+          <NodeActionMenu
+            visible={isSelecting && !dragingNode}
+            sourceNode={nodeData}
+          />
         </div>
       )}
     </>

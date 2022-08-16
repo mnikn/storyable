@@ -1,13 +1,36 @@
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import * as d3 from 'd3';
 import useEventState from 'renderer/utils/use_event_state';
 import { Storylet } from 'renderer/models/storylet';
 import StoryProvider from '../../services/story_provider';
-import { text } from 'stream/consumers';
+import eventBus, { Event } from './event';
 
-function useView({ zoomDom }: { zoomDom: HTMLElement | null }) {
+function findNodeById(json: any, id: string): any | null {
+  if (!json) {
+    return null;
+  }
+  if (json.id === id) {
+    return json;
+  }
+
+  let res: any | null = null;
+  json.children.forEach((item: any) => {
+    res = res || findNodeById(item, id);
+  });
+
+  return res;
+}
+
+function useView({
+  zoomDom,
+  dragingNode,
+}: {
+  zoomDom: HTMLElement | null;
+  dragingNode: any;
+}) {
   const [treeData, setTreeData] = useState<any[]>([]);
   const [linkData, setLinkData] = useState<any[]>([]);
+  const [zoom, setZoom] = useState<number>(1);
 
   const currentStorylet = useEventState<Storylet>({
     event: StoryProvider.event,
@@ -16,36 +39,19 @@ function useView({ zoomDom }: { zoomDom: HTMLElement | null }) {
   });
 
   useLayoutEffect(() => {
-    /* const json = rootData.toRenderJson();
-     * if (dragingTreeNode) {
-     *   const pnode = findNodeById(
-     *     json,
-     *     findNodeById(json, dragingTreeNode.data.id)?.parentId as string
-     *   );
-     *   if (pnode) {
-     *     pnode.children = pnode.children.filter(
-     *       (n) => n.id !== dragingTreeNode.data.id
-     *     );
-     *   }
-     * } */
-
     if (!currentStorylet) {
       return;
     }
-    // console.log(currentStorylet.toJson());
-    // const json = {
-    //   id: 't1',
-    //   children: [
-    //     {
-    //       id: 't2',
-    //     },
-    //     {
-    //       id: 't3',
-    //     },
-    //   ],
-    // };
-    const json = currentStorylet.toHierarchyJson()[0] || {};
-    console.log('vrrw: ', json);
+    const data = currentStorylet.clone();
+    if (dragingNode) {
+      Object.keys(data.links).forEach((k) => {
+        if (k.includes(dragingNode.data.id)) {
+          delete data.links[k];
+        }
+      });
+      delete data.nodes[dragingNode.id];
+    }
+    const json = data.toHierarchyJson()[0] || {};
     const root = d3.hierarchy(json) as d3.HierarchyRectangularNode<any>;
     root.x0 = 0;
     root.y0 = 0;
@@ -59,9 +65,9 @@ function useView({ zoomDom }: { zoomDom: HTMLElement | null }) {
 
     const updateNodeTree = (source: any) => {
       let nodes = root.descendants().reverse();
-      /* if (dragingTreeNode) {
-       *   nodes = nodes.concat(dragingTreeNode);
-       * } */
+      if (dragingNode) {
+        nodes = nodes.concat(dragingNode);
+      }
 
       setTreeData(nodes);
 
@@ -150,7 +156,7 @@ function useView({ zoomDom }: { zoomDom: HTMLElement | null }) {
     };
 
     updateNodeTree(root);
-  }, [currentStorylet]);
+  }, [currentStorylet, dragingNode]);
 
   // useLayoutEffect(() => {
   //   const data = {
@@ -451,10 +457,7 @@ function useView({ zoomDom }: { zoomDom: HTMLElement | null }) {
       /* eslint-disable func-names */
       (d3 as any).zoom().on('zoom', function () {
         const transfromRes = d3.zoomTransform(this);
-        /* owner.zoom = transfromRes.k; */
-        // style={{
-        //   transform: 'translate(0, 30%) scale(0.5)',
-        // }}
+        setZoom(transfromRes.k);
         d3.select(zoomDom).style(
           'transform',
           `translate(${transfromRes.x}px,${transfromRes.y}px) scale(${transfromRes.k})`
@@ -465,7 +468,20 @@ function useView({ zoomDom }: { zoomDom: HTMLElement | null }) {
     d3.select(elm).on('dblclick.zoom', null);
   }, [zoomDom]);
 
+  useEffect(() => {
+    const refresh = () => {
+      setTreeData((prev: any) => {
+        return [...prev];
+      });
+    };
+    eventBus.on(Event.REFRESH_NODE_VIEW, refresh);
+    return () => {
+      eventBus.off(Event.REFRESH_NODE_VIEW, refresh);
+    };
+  }, []);
+
   return {
+    zoom,
     treeData,
     linkData,
   };

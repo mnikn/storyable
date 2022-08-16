@@ -42,6 +42,7 @@ function RenameDialog() {
       open={open}
       onClose={() => {
         setOpen(false);
+        eventBus.emit(Event.CLOSE_DIALOG);
       }}
       title="Rename"
     >
@@ -70,6 +71,7 @@ function RenameDialog() {
               StoryProvider.updateStoryletGroup(item);
             }
             setOpen(false);
+            eventBus.emit(Event.CLOSE_DIALOG);
           }}
         >
           Confirm
@@ -77,7 +79,10 @@ function RenameDialog() {
         <button
           type="button"
           className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            setOpen(false);
+            eventBus.emit(Event.CLOSE_DIALOG);
+          }}
         >
           Cancel
         </button>
@@ -210,6 +215,11 @@ function Sidebar() {
     property: 'storyletGroups',
     initialVal: StoryProvider.storyletGroups,
   });
+  const currentStorylet = useEventState<Storylet>({
+    event: StoryProvider.event,
+    property: 'currentStorylet',
+    initialVal: StoryProvider.currentStorylet || undefined,
+  });
 
   const [menuType, setMenuType] = useState<'storylet' | 'group'>('group');
   const [menuTriggeredItem, setMenuTriggeredItem] = useState<
@@ -225,6 +235,9 @@ function Sidebar() {
       return;
     }
 
+    const groupId = StoryProvider.story.storylets.find(
+      (item) => item.data.id === currentStorylet?.id
+    )?.group.id;
     setExpandedInfo((prev) => {
       const res: any = prev;
       groups.forEach((group) => {
@@ -233,10 +246,20 @@ function Sidebar() {
             res[g.id] = false;
           }
         });
+
+        if (groupId) {
+          if (group.id === groupId || group.findChildRecursive(groupId)) {
+            res[group.id] = true;
+            group.iterRecursive((g) => {
+              res[g.id] = true;
+            });
+          }
+        }
       });
-      return res;
+
+      return { ...res };
     });
-  }, [groups]);
+  }, [groups, currentStorylet]);
 
   const addRootGroup = () => {
     StoryProvider.createStoryletGroup();
@@ -323,6 +346,13 @@ function Sidebar() {
               }}
             >
               Rename
+            </Item>
+            <Item
+              onClick={() => {
+                eventBus.emit(Event.SHOW_MOVE_DIALOG, menuTriggeredItem);
+              }}
+            >
+              Move
             </Item>
             <Item
               onClick={() => {

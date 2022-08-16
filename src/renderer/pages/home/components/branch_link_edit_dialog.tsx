@@ -77,21 +77,21 @@ function BranchLinkEditDialog() {
           className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
           onClick={() => {
             setOpen(false);
-            eventBus.emit(Event.CLOSE_EDIT_DIALOG);
+            eventBus.emit(Event.CLOSE_DIALOG);
             if (sourceNode && form) {
               const newTranslations = { ...StoryProvider.translations };
-              if (!newTranslations[sourceNode.data.content]) {
-                newTranslations[sourceNode.data.content] = {
+              if (!newTranslations[sourceNode.data.optionName]) {
+                newTranslations[sourceNode.data.optionName] = {
                   [StoryProvider.currentLang]: form.optionName,
                 };
               } else {
-                newTranslations[sourceNode.data.content][
+                newTranslations[sourceNode.data.optionName][
                   StoryProvider.currentLang
                 ] = form.optionName;
               }
               sourceNode.data = {
                 ...form,
-                optionName: sourceNode.data.content,
+                optionName: sourceNode.data.optionName,
               };
               StoryProvider.updateTranslations(newTranslations);
               StoryProvider.updateStoryletNodeLink(sourceNode);
@@ -105,7 +105,7 @@ function BranchLinkEditDialog() {
           className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
           onClick={() => {
             setOpen(false);
-            eventBus.emit(Event.CLOSE_EDIT_DIALOG);
+            eventBus.emit(Event.CLOSE_DIALOG);
           }}
         >
           Cancel

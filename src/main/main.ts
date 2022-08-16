@@ -47,7 +47,16 @@ ipcMain.on('saveFile', async (event, arg = {}) => {
       res: { filePath },
       arg,
     };
-    event.reply('saveJsonFile', data);
+    event.reply('saveFile', data);
+  }
+});
+
+ipcMain.on('readFile', async (event, arg) => {
+  if (fs.existsSync(arg.path)) {
+    const content = fs.readFileSync(arg.path).toString();
+    event.reply('readFile', { res: content, arg });
+  } else {
+    event.reply('readFile', { res: null, arg });
   }
 });
 
@@ -98,6 +107,7 @@ const createWindow = async () => {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
+      webSecurity: false,
     },
     autoHideMenuBar: true,
   });

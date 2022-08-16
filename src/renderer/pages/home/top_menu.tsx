@@ -36,7 +36,14 @@ function TopMenu() {
           top: '12px',
         }}
       >
-        <CgPlayButton className="text-5xl text-white cursor-pointer hover:text-gray-800 transition-all" />
+        <CgPlayButton
+          className="text-5xl text-white cursor-pointer hover:text-gray-800 transition-all"
+          onClick={() => {
+            if (StoryProvider.currentStorylet) {
+              eventBus.emit(Event.SHOW_PREVIEW_DIALOG);
+            }
+          }}
+        />
         <select
           className="border border-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none cursor-pointer"
           value={currentLang}

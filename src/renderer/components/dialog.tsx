@@ -54,7 +54,7 @@ function Dialog({
                       {title && (
                         <BaseDialog.Title
                           as="h3"
-                          className="text-xl leading-6 font-bold text-gray-900 text-center"
+                          className="text-xl leading-6 font-bold text-gray-900 text-center select-none"
                         >
                           {title}
                         </BaseDialog.Title>

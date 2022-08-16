@@ -114,12 +114,39 @@ export class Story {
 
     instance.storylets = json.storylets.map((item: any) => {
       return {
-        group: instance.storyletGroups.find(
-          (item2) => item2.id === item.groupId
-        ),
-        data: Tree.fromJson(item.data),
+        group: instance.storyletGroups.reduce((res: any, g) => {
+          if (res) {
+            return res;
+          }
+          if (g.id === item.groupId) {
+            return g;
+          }
+          const matchChild = g.findChildRecursive(item.groupId);
+          if (matchChild) {
+            return matchChild;
+          }
+          return res;
+        }, undefined),
+        data: Storylet.fromJson(item.data),
       };
     });
+    instance.storylets = instance.storylets.filter((item) => !!item.group);
     return instance;
+  }
+
+  public getStoryletGroup(id: string): StoryletGroup | null {
+    return this.storyletGroups.reduce((res: any, g) => {
+      if (res) {
+        return res;
+      }
+      if (g.id === id) {
+        return g;
+      }
+      const matchChild = g.findChildRecursive(id);
+      if (matchChild) {
+        return matchChild;
+      }
+      return res;
+    }, null);
   }
 }

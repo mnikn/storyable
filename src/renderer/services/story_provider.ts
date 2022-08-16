@@ -1,8 +1,15 @@
 import EventEmitter from 'eventemitter3';
+import {
+  LAST_OPEN_STORYLET,
+  PROJECT_PATH,
+} from 'renderer/constatnts/storage_key';
+import { concatPath, getBaseUrl } from 'renderer/utils/file';
 import { generateUUID } from 'renderer/utils/uuid';
 import { formatNodeLinkId, NodeLink } from '../models/base/tree';
 import { Story, StoryletGroup } from '../models/story';
 import { Storylet, StoryletBranchNode, StoryletNode } from '../models/storylet';
+import { parse as jsonParseCsv } from 'json2csv';
+import csv from 'csvtojson';
 
 class StoryProvider {
   public story: Story = new Story();
@@ -10,8 +17,16 @@ class StoryProvider {
 
   public event: EventEmitter = new EventEmitter();
 
-  public projectSettings: any = {
+  public projectSettings: {
+    i18n: string[];
+    actors: {
+      id: string;
+      name: string;
+      portraits: any[];
+    }[];
+  } = {
     i18n: ['en'],
+    actors: [],
   };
 
   public translations: { [key: string]: { [key: string]: string } } = {};
@@ -19,13 +34,17 @@ class StoryProvider {
   public currentLang: string = 'en';
 
   constructor() {
-    const uncategorizedGroup = new StoryletGroup();
-    uncategorizedGroup.name = 'uncategorized';
-    this.story.addStoryGroup(uncategorizedGroup);
+    if (localStorage.getItem(PROJECT_PATH)) {
+      this.loadCacheStory();
+    } else {
+      const uncategorizedGroup = new StoryletGroup();
+      uncategorizedGroup.name = 'uncategorized';
+      this.story.addStoryGroup(uncategorizedGroup);
 
-    const mockStorylet1 = new Storylet();
-    mockStorylet1.name = 'storylet1';
-    this.story.addStorylet(mockStorylet1, uncategorizedGroup);
+      const mockStorylet1 = new Storylet();
+      mockStorylet1.name = 'storylet1';
+      this.story.addStorylet(mockStorylet1, uncategorizedGroup);
+    }
   }
 
   get storyletGroups(): StoryletGroup[] {
@@ -40,6 +59,60 @@ class StoryProvider {
     return this.storylets
       .filter((item) => item.group.id === groupId)
       .map((item) => item.data);
+  }
+
+  public async loadCacheStory() {
+    const path = localStorage.getItem(PROJECT_PATH);
+    if (!path) {
+      return;
+    }
+
+    try {
+      const res = await window.electron.ipcRenderer.call('readFile', {
+        path,
+      });
+      const resJson = JSON.parse(res.res);
+      this.story = Story.fromJson(resJson.story);
+      this.projectSettings = {
+        ...this.projectSettings,
+        ...resJson.projectSettings,
+      };
+
+      const translationPath = concatPath(getBaseUrl(path), 'translation.csv');
+      const res2 = await window.electron.ipcRenderer.call('readFile', {
+        path: translationPath,
+      });
+
+      const translations: any = {};
+      if (res2.res) {
+        const str = await csv({
+          output: 'csv',
+        }).fromString(res2.res);
+        str.forEach((s, i) => {
+          s.forEach((s2, j) => {
+            if (j === 0) {
+              translations[s2] = {};
+            } else {
+              translations[s[0]][this.projectSettings.i18n[j - 1]] = s2;
+            }
+          });
+        });
+        this.translations = translations;
+      }
+
+      this.event.emit('change:storyletGroups', [...this.storyletGroups]);
+      this.event.emit('change:storylets', [...this.storylets]);
+      this.event.emit('change:translations', { ...this.translations });
+      this.event.emit('change:projectSettings', { ...this.projectSettings });
+
+      const cacheStorylet = localStorage.getItem(LAST_OPEN_STORYLET);
+      if (cacheStorylet) {
+        this.changeCurrentStorylet(cacheStorylet);
+      }
+      this.changeLang(this.projectSettings.i18n[0]);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   public createStoryletGroup(parent: StoryletGroup | null = null) {
@@ -134,6 +207,34 @@ class StoryProvider {
     this.event.emit('change:currentStorylet', this.currentStorylet.clone());
   }
 
+  public moveStoryletNode(sourceId: string, newParentId: string) {
+    if (!this.currentStorylet) {
+      return;
+    }
+    Object.values(this.currentStorylet.links).forEach((item) => {
+      if (item.target.id === sourceId) {
+        if (this.currentStorylet) {
+          delete this.currentStorylet.links[
+            formatNodeLinkId(item.source.id, item.target.id)
+          ];
+        }
+      }
+    });
+
+    const child = this.currentStorylet.nodes[sourceId];
+    const parnet = this.currentStorylet.nodes[newParentId];
+    const newLinkItem = new NodeLink(parnet, child);
+    if (parnet instanceof StoryletBranchNode) {
+      newLinkItem.data = {
+        optionName: 'option_' + generateUUID(),
+        optionId: '',
+      };
+    }
+    this.currentStorylet.links[formatNodeLinkId(newParentId, sourceId)] =
+      newLinkItem;
+    this.event.emit('change:currentStorylet', this.currentStorylet.clone());
+  }
+
   public updateStoryletGroup(data: StoryletGroup) {
     const matchIndex = this.storyletGroups.findIndex(
       (item: StoryletGroup) => item.id === data.id
@@ -161,6 +262,7 @@ class StoryProvider {
   }
 
   public changeCurrentStorylet(id: string) {
+    localStorage.setItem(LAST_OPEN_STORYLET, id);
     this.currentStorylet =
       this.storylets.find((item) => item.data.id === id)?.data || null;
     this.event.emit(
@@ -194,16 +296,82 @@ class StoryProvider {
     this.event.emit('change:translations', { ...val });
   }
 
+  public updateTranslateKey(key: string, val: string) {
+    const newTranslations = { ...this.translations };
+    newTranslations[key] = {
+      ...newTranslations[key],
+      [this.currentLang]: val,
+    };
+    this.projectSettings.i18n.forEach((lang) => {
+      if (lang !== this.currentLang) {
+        newTranslations[key][lang] = newTranslations[key][lang] || '';
+      }
+    });
+    this.updateTranslations(newTranslations);
+  }
+
   public changeLang(lang: string) {
     this.currentLang = lang;
     this.event.emit('change:currentLang', lang);
   }
 
+  public moveStorylet(storyletId: string, targetGroup: string) {
+    if (!storyletId || !targetGroup || !this.story) {
+      return;
+    }
+
+    const storyletWithGroup = this.story.storylets.find(
+      (s) => s.data.id === storyletId
+    );
+    if (storyletWithGroup) {
+      const group = this.story.getStoryletGroup(targetGroup);
+      if (group) {
+        storyletWithGroup.group = group;
+      }
+    }
+
+    console.log('after: ', this.storylets);
+    this.event.emit('change:storylets', [...this.storylets]);
+  }
+
   public async save() {
-    window.electron.ipcRenderer.call('saveFile', {
-      data: JSON.stringify(this.story.toJson(), null, 2),
-      extensions: ['st'],
-    });
+    try {
+      const res = await window.electron.ipcRenderer.call('saveFile', {
+        data: JSON.stringify(
+          {
+            story: this.story.toJson(),
+            projectSettings: this.projectSettings,
+          },
+          null,
+          2
+        ),
+        extensions: ['st'],
+        path: localStorage.getItem(PROJECT_PATH),
+      });
+      localStorage.setItem(PROJECT_PATH, res.res.filePath);
+
+      const translationPath = concatPath(
+        getBaseUrl(res.res.filePath),
+        'translation.csv'
+      );
+      const options = { fields: ['keys', ...this.projectSettings.i18n] };
+
+      const data: any[] = [];
+      Object.keys(this.translations).forEach((key) => {
+        data.push({
+          keys: key,
+          ...this.translations[key],
+        });
+      });
+      const translationData = jsonParseCsv(data, options);
+      await window.electron.ipcRenderer.call('saveFile', {
+        data: translationData,
+        extensions: ['st'],
+        path: translationPath,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
 

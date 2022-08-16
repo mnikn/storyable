@@ -22,6 +22,19 @@ function useShortcut({
       if (isQuickEditing || isDialogEditing) {
         return;
       }
+
+      // switch lang shortcut
+      if (e.code.includes('Digit') && e.ctrlKey) {
+        const index = Number(e.code.split('Digit')[1]) - 1;
+        if (index >= 0 && StoryProvider.projectSettings.i18n.length > index) {
+          StoryProvider.changeLang(StoryProvider.projectSettings.i18n[index]);
+        }
+      }
+
+      if (e.code === 'KeyS' && e.ctrlKey) {
+        eventBus.emit(Event.SAVE);
+      }
+
       const currentStorylet = StoryProvider.currentStorylet;
       if (!selectingNode || !currentStorylet) {
         return;
@@ -48,10 +61,6 @@ function useShortcut({
       //   eventBus.emit(Event.QUICK_EDIT_SUBMIT);
       // }
 
-      if (e.code === 'KeyS') {
-        eventBus.emit(Event.SAVE);
-      }
-
       if (e.code === 'Escape') {
         eventBus.emit(Event.DESELECT_NODE);
       }
@@ -61,6 +70,8 @@ function useShortcut({
           eventBus.emit(Event.SHOW_SENTENCE_EDIT_DIALOG, currentSelectingNode);
         } else if (currentSelectingNode instanceof StoryletBranchNode) {
           eventBus.emit(Event.SHOW_BRANCH_EDIT_DIALOG, currentSelectingNode);
+        } else if (currentSelectingNode instanceof StoryletInitNode) {
+          eventBus.emit(Event.SHOW_ROOT_EDIT_DIALOG, currentSelectingNode);
         }
       }
 

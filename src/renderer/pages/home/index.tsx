@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import StoryProvider from 'renderer/services/story_provider';
 import Link from './components/link';
 import NodeCard from './components/node_card';
@@ -7,22 +7,33 @@ import useView from './use_view';
 import Context from './context';
 import eventBus, { Event } from './event';
 import useShortcut from './use_shortcut';
-import { StoryletNode } from 'renderer/models/storylet';
+import { StoryletInitNode, StoryletNode } from 'renderer/models/storylet';
 import SentenceEditDialog from './components/sentence_edit_dialog';
 import BranchEditDialog from './components/branch_edit_dialog';
 import TopMenu from './top_menu';
 import ProjectSettingsDialog from './components/project_settings_dialog';
 import BranchLinkEditDialog from './components/branch_link_edit_dialog';
+import { CgShapeHalfCircle } from 'react-icons/cg';
+import PreviewDialog from './components/preview_dialog';
+import MoveDialog from './move_dialog';
+import RootEditDialog from './components/root_edit_dialog';
 
 function Home() {
   const [zoomDom, setZoomDom] = useState<HTMLDivElement | null>(null);
 
   const [selectingNode, setSelectingNode] = useState<string | null>(null);
   const [isQuickEditing, setIsQuickEditing] = useState(false);
-  const [isDialogEditing, setIsDialogEditing] = useState(false);
+  const [isDialogShowing, setIsDialogShowing] = useState(false);
+  const [dragingNode, setDragingNode] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
 
-  const { treeData, linkData } = useView({
+  const dragingNodeRef = useRef<any>(dragingNode);
+  dragingNodeRef.current = dragingNode;
+  const dragTargetRef = useRef<any>(null);
+
+  const { zoom, treeData, linkData } = useView({
     zoomDom,
+    dragingNode,
   });
 
   useEffect(() => {
@@ -32,7 +43,7 @@ function Home() {
   useShortcut({
     selectingNode,
     isQuickEditing,
-    isDialogEditing,
+    isDialogEditing: isDialogShowing,
   });
 
   useEffect(() => {
@@ -87,15 +98,53 @@ function Home() {
     };
 
     const onDialogShow = () => {
-      setIsDialogEditing(true);
+      setIsDialogShowing(true);
     };
 
     const onDialogClose = () => {
-      setIsDialogEditing(false);
+      setIsDialogShowing(false);
     };
 
     const onSave = async () => {
-      StoryProvider.save();
+      if (saving) {
+        return;
+      }
+      setSaving(true);
+      await StoryProvider.save();
+      setTimeout(() => {
+        setSaving(false);
+      }, 1000);
+    };
+
+    const onDragNode = (val: any, item: any) => {
+      if (!dragingNodeRef.current) {
+        dragingNodeRef.current = item;
+        setSelectingNode(item.data.id);
+        setDragingNode(item);
+        return;
+      }
+      item.x0 += val.dy / zoom;
+      item.y0 += val.dx / zoom;
+      eventBus.emit(Event.REFRESH_NODE_VIEW);
+    };
+
+    const onDragEnd = () => {
+      if (dragTargetRef.current) {
+        if (dragTargetRef.current.type === 'child') {
+          StoryProvider.moveStoryletNode(
+            dragingNodeRef.current.id,
+            dragTargetRef.current.node.id
+          );
+        } else if (dragTargetRef.current.type === 'parent') {
+          const parentId =
+            StoryProvider.currentStorylet?.getNodeSingleParent(
+              dragTargetRef.current.node.id
+            )?.id || '';
+          StoryProvider.moveStoryletNode(dragingNodeRef.current.id, parentId);
+        }
+      }
+      setDragingNode(null);
+      dragTargetRef.current = null;
     };
 
     eventBus.on(Event.SELECT_NODE, onSelectNode);
@@ -107,7 +156,13 @@ function Home() {
     eventBus.on(Event.SHOW_BRANCH_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_PROJECT_SETTINGS_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_BRANCH_LINK_EDIT_DIALOG, onDialogShow);
-    eventBus.on(Event.CLOSE_EDIT_DIALOG, onDialogClose);
+    eventBus.on(Event.SHOW_PREVIEW_DIALOG, onDialogShow);
+    eventBus.on(Event.SHOW_SIDEBAR_RENAME_DIALOG, onDialogShow);
+    eventBus.on(Event.SHOW_ROOT_EDIT_DIALOG, onDialogShow);
+    eventBus.on(Event.ON_SHOW_DIALOG, onDialogShow);
+    eventBus.on(Event.CLOSE_DIALOG, onDialogClose);
+    eventBus.on(Event.DRAG_NODE, onDragNode);
+    eventBus.on(Event.END_DRAG_NODE, onDragEnd);
     eventBus.on(Event.SAVE, onSave);
     return () => {
       eventBus.off(Event.SELECT_NODE, onSelectNode);
@@ -118,10 +173,16 @@ function Home() {
       eventBus.off(Event.SHOW_SENTENCE_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_BRANCH_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_BRANCH_LINK_EDIT_DIALOG, onDialogShow);
-      eventBus.off(Event.CLOSE_EDIT_DIALOG, onDialogClose);
+      eventBus.off(Event.SHOW_PREVIEW_DIALOG, onDialogShow);
+      eventBus.off(Event.SHOW_SIDEBAR_RENAME_DIALOG, onDialogShow);
+      eventBus.off(Event.SHOW_ROOT_EDIT_DIALOG, onDialogShow);
+      eventBus.off(Event.ON_SHOW_DIALOG, onDialogShow);
+      eventBus.off(Event.CLOSE_DIALOG, onDialogClose);
+      eventBus.off(Event.DRAG_NODE, onDragNode);
+      eventBus.off(Event.END_DRAG_NODE, onDragEnd);
       eventBus.off(Event.SAVE, onSave);
     };
-  }, []);
+  }, [zoom]);
 
   const onDomMounted = useCallback((dom: HTMLDivElement) => {
     if (dom) {
@@ -134,6 +195,7 @@ function Home() {
       value={{
         selectingNode,
         isQuickEditing,
+        dragingNode,
       }}
     >
       <div className="flex h-full">
@@ -153,12 +215,39 @@ function Home() {
                 return (
                   <div key={item.id}>
                     <>
+                      {dragingNode && item !== dragingNode && (
+                        <div
+                          className="w-32 h-32 bg-pink-500 opacity-80 absolute hover:opacity-100 rounded-full cursor-pointer"
+                          style={{
+                            left: item.y + 350,
+                            top: item.x + 20,
+                            zIndex: 3,
+                          }}
+                          onMouseEnter={() => {
+                            const currentStorylet =
+                              StoryProvider.currentStorylet;
+                            if (!currentStorylet) {
+                              return;
+                            }
+                            const currentNode = currentStorylet.nodes[item.id];
+                            dragTargetRef.current = {
+                              node: currentNode,
+                              type: 'child',
+                            };
+                          }}
+                          onMouseLeave={() => {
+                            dragTargetRef.current = null;
+                          }}
+                        />
+                      )}
                       <NodeCard
+                        key={item.id}
                         nodeId={item.id}
                         pos={{
                           x: item.x0,
                           y: item.y0,
                         }}
+                        data={item}
                       />
                     </>
                   </div>
@@ -201,6 +290,15 @@ function Home() {
       <BranchEditDialog />
       <BranchLinkEditDialog />
       <ProjectSettingsDialog />
+      <RootEditDialog />
+      <PreviewDialog />
+      <MoveDialog />
+      {saving && (
+        <div className="absolute inset-x-0 top-12 left-1/2 h-16 p-2 bg-gray-50 w-64 rounded-md flex items-center justify-center">
+          <CgShapeHalfCircle className="animate-spin text-xl mr-2" />
+          <div className="font-bold text-xl">Saving...</div>
+        </div>
+      )}
     </Context.Provider>
   );
 }

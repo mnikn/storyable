@@ -173,9 +173,9 @@ function ConditionPanel({
   onChange: (val: Condition[]) => void;
 }) {
   return (
-    <div className="block mb-5">
+    <div className="block mb-5 flex-grow flex flex-col">
       <div className="text-md text-black mb-2 font-bold">Enable Conditions</div>
-      <div className="h-48 overflow-auto border border-gray-300 p-2 mb-4 rounded-md">
+      <div className="h-48 overflow-auto border border-gray-300 p-2 mb-4 rounded-md flex-grow">
         {conditions.length === 0 && (
           <div className="text-md text-gray-500 w-full h-full flex items-center justify-center">
             Empty enable condition

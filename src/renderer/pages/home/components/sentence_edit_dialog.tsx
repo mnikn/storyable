@@ -6,6 +6,8 @@ import {
   StoryletSentenceNodeData,
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
+import useEventState from 'renderer/utils/use_event_state';
+import Select, { components } from 'react-select';
 import eventBus, { Event } from '../event';
 import ConditionPanel from './condition_panel';
 
@@ -21,6 +23,21 @@ function SentenceEditDialog() {
     null
   );
   const [currentTab, setCurrentTab] = useState<Tab>(Tab.BaseConfig);
+  const translations = useEventState<any>({
+    property: 'translations',
+    event: StoryProvider.event,
+    initialVal: StoryProvider.translations,
+  });
+  const currentLang = useEventState<any>({
+    property: 'currentLang',
+    event: StoryProvider.event,
+    initialVal: StoryProvider.currentLang,
+  });
+  const projectSettings = useEventState<any>({
+    property: 'projectSettings',
+    event: StoryProvider.event,
+    initialVal: StoryProvider.projectSettings,
+  });
 
   useEffect(() => {
     const showDialog = (data: StoryletSentenceNode) => {
@@ -45,7 +62,110 @@ function SentenceEditDialog() {
     content = (
       <>
         {form && (
-          <div className="w-full flex flex-col p-2">
+          <div className="w-full flex flex-col p-2 h-86 overflow-auto">
+            <div className="block mb-5">
+              <div className="text-md text-black mb-2 font-bold">Actor</div>
+              <div className="flex items-center">
+                <select
+                  className="border border-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none cursor-pointer mr-2 w-40"
+                  value={form.actor || ''}
+                  onChange={(e) => {
+                    form.actor = e.target.value;
+                    form.actorPortrait =
+                      projectSettings.actors.find(
+                        (item: any) => item.id === form.actor
+                      )?.portraits[0]?.id || null;
+                    setForm((prev: any) => {
+                      return { ...prev };
+                    });
+                  }}
+                >
+                  {[
+                    {
+                      id: '',
+                      name: 'None',
+                      portraits: [],
+                    },
+                    ...projectSettings.actors,
+                  ].map((actor: any, i: number) => {
+                    return (
+                      <option key={i} value={actor.id}>
+                        {!actor.id
+                          ? 'None'
+                          : translations[actor.name]?.[currentLang]}
+                      </option>
+                    );
+                  })}
+                </select>
+                <Select
+                  className="text-sm block p-2 outline-none cursor-pointer mr-2 w-80"
+                  value={form.actorPortrait || ''}
+                  onChange={(e) => {
+                    // form.actorPortrait = e.target.value;
+                    form.actorPortrait = (e as any).value;
+                    setForm((prev: any) => {
+                      return { ...prev };
+                    });
+                  }}
+                  options={(
+                    projectSettings.actors.find(
+                      (item: any) => item.id === form.actor
+                    )?.portraits || []
+                  ).map((p: any) => {
+                    return {
+                      value: p.id,
+                      label: p.id,
+                      pic: p.pic,
+                    };
+                  })}
+                  components={{
+                    Placeholder: () => {
+                      return null;
+                    },
+                    IndicatorsContainer: (props) => {
+                      return (
+                        <components.IndicatorsContainer
+                          {...props}
+                          className={`${props.className} cursor-pointer`}
+                        />
+                      );
+                    },
+                    Input: (props) => {
+                      const data = projectSettings.actors
+                        .find((item: any) => item.id === form.actor)
+                        ?.portraits.find((p) => p.id === form.actorPortrait);
+                      return (
+                        <div className="flex items-center p-2" {...props}>
+                          <img
+                            className="bg-gray-800 mr-2 object-cover"
+                            src={data?.pic}
+                            alt=""
+                            style={{ width: '48px', height: '48px' }}
+                          />
+                          {form.actorPortrait || ''}
+                        </div>
+                      );
+                    },
+                    Option: ({ innerProps, data, label }) => {
+                      return (
+                        <div
+                          className="flex items-center hover:bg-gray-100 transition-all p-2"
+                          {...innerProps}
+                        >
+                          <img
+                            className="bg-gray-800 mr-2 object-cover"
+                            src={(data as any).pic}
+                            alt=""
+                            style={{ width: '80px', height: '80px' }}
+                          />
+                          {label}
+                        </div>
+                      );
+                    },
+                  }}
+                />
+              </div>
+            </div>
             <div className="block mb-5">
               <div className="text-md text-black mb-2 font-bold">Content</div>
               <textarea
@@ -87,7 +207,7 @@ function SentenceEditDialog() {
             className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
             onClick={() => {
               setOpen(false);
-              eventBus.emit(Event.CLOSE_EDIT_DIALOG);
+              eventBus.emit(Event.CLOSE_DIALOG);
               if (sourceNode && form) {
                 const newTranslations = { ...StoryProvider.translations };
                 if (!newTranslations[sourceNode.data.content]) {
@@ -99,6 +219,7 @@ function SentenceEditDialog() {
                     StoryProvider.currentLang
                   ] = form.content;
                 }
+                console.log(form);
                 sourceNode.data = {
                   ...form,
                   content: sourceNode.data.content,
@@ -115,7 +236,7 @@ function SentenceEditDialog() {
             className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
             onClick={() => {
               setOpen(false);
-              eventBus.emit(Event.CLOSE_EDIT_DIALOG);
+              eventBus.emit(Event.CLOSE_DIALOG);
             }}
           >
             Cancel
