@@ -254,10 +254,10 @@ function NodeCard({
           ref={dragListen}
         >
           {(!isQuickEditing || !isSelecting) && (
-            <div className="flex cursor-pointer h-full overflow-hidden">
+            <div className="flex cursor-pointer w-full h-full overflow-hidden">
               {nodeData.data.actor && (
                 <img
-                  className="mr-5 object-contain m-auto bg-gray-800 rounded-md"
+                  className="mr-5 object-contain bg-gray-800 rounded-md"
                   src={
                     (
                       projectSettings.actors.find(

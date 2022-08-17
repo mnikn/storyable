@@ -7,9 +7,29 @@ import { concatPath, getBaseUrl } from 'renderer/utils/file';
 import { generateUUID } from 'renderer/utils/uuid';
 import { formatNodeLinkId, NodeLink } from '../models/base/tree';
 import { Story, StoryletGroup } from '../models/story';
-import { Storylet, StoryletBranchNode, StoryletNode } from '../models/storylet';
+import {
+  Storylet,
+  StoryletActionNode,
+  StoryletBranchNode,
+  StoryletInitNode,
+  StoryletNode,
+  StoryletSentenceNode,
+} from '../models/storylet';
 import { parse as jsonParseCsv } from 'json2csv';
 import csv from 'csvtojson';
+import {
+  DEFAULT_CONFIG,
+  SchemaField,
+  SchemaFieldObject,
+  validateValue,
+} from 'renderer/models/schema/schema';
+import { buildSchema } from 'renderer/models/schema/factory';
+
+const OBJ_JSON = {
+  type: 'object',
+  fields: {},
+  config: DEFAULT_CONFIG.OBJECT_CONFIG_DEFAULT,
+};
 
 class StoryProvider {
   public story: Story = new Story();
@@ -24,9 +44,21 @@ class StoryProvider {
       name: string;
       portraits: any[];
     }[];
+    extraDataConfig: {
+      root: any;
+      sentence: any;
+      branch: any;
+      action: any;
+    };
   } = {
     i18n: ['en'],
     actors: [],
+    extraDataConfig: {
+      root: OBJ_JSON,
+      sentence: OBJ_JSON,
+      branch: OBJ_JSON,
+      action: OBJ_JSON,
+    },
   };
 
   public translations: { [key: string]: { [key: string]: string } } = {};
@@ -100,6 +132,48 @@ class StoryProvider {
         this.translations = translations;
       }
 
+      const rootSchema = buildSchema(
+        this.projectSettings.extraDataConfig.root || OBJ_JSON
+      );
+      const sentenceSchema = buildSchema(
+        this.projectSettings.extraDataConfig.sentence
+      );
+      const branchSchema = buildSchema(
+        this.projectSettings.extraDataConfig.branch
+      );
+      const actionSchema = buildSchema(
+        this.projectSettings.extraDataConfig.action
+      );
+      this.story.storylets.forEach((item) => {
+        Object.values(item.data.nodes).forEach((node) => {
+          let schema: SchemaField = new SchemaFieldObject();
+          let schemaConfig: any = OBJ_JSON;
+          if (node instanceof StoryletSentenceNode) {
+            schema = sentenceSchema;
+            schemaConfig = this.projectSettings.extraDataConfig.sentence;
+          }
+          if (node instanceof StoryletBranchNode) {
+            schema = branchSchema;
+            schemaConfig = this.projectSettings.extraDataConfig.branch;
+          }
+          if (node instanceof StoryletActionNode) {
+            schema = actionSchema;
+            schemaConfig = this.projectSettings.extraDataConfig.action;
+          }
+          if (node instanceof StoryletInitNode) {
+            schema = rootSchema;
+            schemaConfig = this.projectSettings.extraDataConfig.root;
+          }
+          node.data.extraData = validateValue(
+            node.data.extraData,
+            node.data.extraData,
+            schema,
+            schemaConfig
+          );
+        });
+      });
+
+      console.log(this.story);
       this.event.emit('change:storyletGroups', [...this.storyletGroups]);
       this.event.emit('change:storylets', [...this.storylets]);
       this.event.emit('change:translations', { ...this.translations });

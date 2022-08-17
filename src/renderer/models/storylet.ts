@@ -12,6 +12,7 @@ export enum NodeType {
 // base node
 export interface StoryletNodeData {
   type: NodeType;
+  extraData: any;
   enableConditions: Condition[];
 }
 export class StoryletNode<D extends StoryletNodeData> extends Node<D> {}
@@ -24,6 +25,7 @@ export class StoryletInitNode extends StoryletNode<StoryletInitNodeData> {
     this.data = {
       type: NodeType.Init,
       enableConditions: [],
+      extraData: {},
     };
   }
 
@@ -31,6 +33,7 @@ export class StoryletInitNode extends StoryletNode<StoryletInitNodeData> {
     const instance = new StoryletInitNode();
     instance.id = json.id;
     instance.data.enableConditions = json.data.enableConditions;
+    instance.data.extraData = json.data.extraData || {};
     return instance;
   }
 }
@@ -48,6 +51,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
       type: NodeType.Sentence,
       content: 'content_' + generateUUID(),
       enableConditions: [],
+      extraData: {},
       actor: null,
       actorPortrait: null,
     };
@@ -58,6 +62,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
     instance.id = json.id;
     instance.data.content = json.data.content;
     instance.data.enableConditions = json.data.enableConditions;
+    instance.data.extraData = json.data.extraData || {};
     instance.data.actor = json.data.actor;
     instance.data.actorPortrait = json.data.actorPortrait;
     return instance;
@@ -77,6 +82,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
       type: NodeType.Branch,
       content: 'content_' + generateUUID(),
       enableConditions: [],
+      extraData: {},
       actor: null,
       actorPortrait: null,
     };
@@ -87,6 +93,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
     instance.id = json.id;
     instance.data.content = json.data.content;
     instance.data.enableConditions = json.data.enableConditions;
+    instance.data.extraData = json.data.extraData || {};
     instance.data.actor = json.data.actor;
     instance.data.actorPortrait = json.data.actorPortrait;
     return instance;
@@ -121,6 +128,7 @@ export class StoryletEmptyActionNode extends StoryletActionNode {
       type: NodeType.Action,
       actionType: ActionType.Empty,
       enableConditions: [],
+      extraData: {},
     };
   }
 
@@ -128,6 +136,7 @@ export class StoryletEmptyActionNode extends StoryletActionNode {
     const instance = new StoryletEmptyActionNode();
     instance.id = json.id;
     instance.data.enableConditions = json.data.enableConditions;
+    instance.data.extraData = json.data.extraData || {};
     return instance;
   }
 }
@@ -147,6 +156,7 @@ export class StoryletSwitchToMatchStoryletActionNode extends StoryletNode<Storyl
     const instance = new StoryletEmptyActionNode();
     instance.id = json.id;
     instance.data.enableConditions = json.data.enableConditions;
+    instance.data.extraData = json.data.extraData || {};
     return instance;
   }
 }

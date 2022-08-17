@@ -219,7 +219,7 @@ function Home() {
                         <div
                           className="w-32 h-32 bg-pink-500 opacity-80 absolute hover:opacity-100 rounded-full cursor-pointer"
                           style={{
-                            left: item.y + 350,
+                            left: item.y + 450,
                             top: item.x + 20,
                             zIndex: 3,
                           }}

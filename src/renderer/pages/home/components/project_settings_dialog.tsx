@@ -7,6 +7,8 @@ import StoryProvider from '../../../services/story_provider';
 import eventBus, { Event } from '../event';
 import { generateUUID } from 'renderer/utils/uuid';
 import useEventState from 'renderer/utils/use_event_state';
+import MonacoEditor from 'react-monaco-editor';
+import ExtraDataConfigPanel from './project_settings/extra_data_config';
 
 enum Tab {
   I18n = 'I18n',
@@ -32,6 +34,7 @@ function ProjectSettingsDialog() {
 
   useEffect(() => {
     const showDialog = () => {
+      setCurrentTab(Tab.I18n);
       setForm(StoryProvider.projectSettings);
       setOpen(true);
     };
@@ -421,6 +424,14 @@ function ProjectSettingsDialog() {
               </button>
             </div>
           </>
+        )}
+        {currentTab === Tab.ExtraDataConfig && (
+          <ExtraDataConfigPanel
+            close={() => {
+              setOpen(false);
+              eventBus.emit(Event.CLOSE_DIALOG);
+            }}
+          />
         )}
       </div>
     </Dialog>

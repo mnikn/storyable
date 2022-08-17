@@ -10,6 +10,7 @@ import useEventState from 'renderer/utils/use_event_state';
 import Select, { components } from 'react-select';
 import eventBus, { Event } from '../event';
 import ConditionPanel from './condition_panel';
+import ExtraDataPanel from './extra_data/extra_data_panel';
 
 enum Tab {
   BaseConfig = 'Base config',
@@ -243,6 +244,17 @@ function SentenceEditDialog() {
           </button>
         </div>
       </>
+    );
+  }
+  if (currentTab === Tab.ExtraData) {
+    content = (
+      <ExtraDataPanel
+        sourceNode={sourceNode}
+        close={() => {
+          setOpen(false);
+          eventBus.emit(Event.CLOSE_DIALOG);
+        }}
+      />
     );
   }
 

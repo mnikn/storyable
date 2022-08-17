@@ -34,6 +34,11 @@ function PreviewDialog() {
     property: 'currentLang',
     initialVal: StoryProvider.currentLang,
   });
+  const projectSettings = useEventState<any>({
+    event: StoryProvider.event,
+    property: 'projectSettings',
+    initialVal: StoryProvider.projectSettings,
+  });
   const nodePath = useEventState<{ nodeId: string; data: any }[]>({
     event: storyProcessor.tracker.event,
     property: 'nodePath',
@@ -300,12 +305,27 @@ function PreviewDialog() {
                   <>
                     {node instanceof StoryletSentenceNode && (
                       <div
-                        className="bg-green-400 rounded-xl p-12 text-md flex items-center justify-center mb-4 select-none"
+                        className="bg-green-400 rounded-xl p-12 text-md flex items-center mb-4 select-none"
                         style={{
                           wordBreak: 'break-all',
                         }}
                         key={item.node.id}
                       >
+                        {node.data.actor && (
+                          <img
+                            className="mr-5 object-contain bg-gray-800 rounded-md"
+                            src={
+                              (
+                                projectSettings.actors.find(
+                                  (item: any) => item.id === node.data.actor
+                                )?.portraits || []
+                              ).find(
+                                (p: any) => p.id === node.data.actorPortrait
+                              )?.pic || ''
+                            }
+                            style={{ width: '100px', height: '100px' }}
+                          />
+                        )}
                         {translations[node.data.content]?.[currentLang]}
                       </div>
                     )}
@@ -318,6 +338,21 @@ function PreviewDialog() {
                           }}
                           key={item.node.id}
                         >
+                          {node.data.actor && (
+                            <img
+                              className="mr-5 object-contain bg-gray-800 rounded-md"
+                              src={
+                                (
+                                  projectSettings.actors.find(
+                                    (item: any) => item.id === node.data.actor
+                                  )?.portraits || []
+                                ).find(
+                                  (p: any) => p.id === node.data.actorPortrait
+                                )?.pic || ''
+                              }
+                              style={{ width: '100px', height: '100px' }}
+                            />
+                          )}
                           {translations[node.data.content]?.[currentLang]}
                         </div>
                         {j === passedNodes.length - 1 &&
