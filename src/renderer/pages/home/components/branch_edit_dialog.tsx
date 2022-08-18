@@ -4,11 +4,13 @@ import Dialog from 'renderer/components/dialog';
 import {
   StoryletBranchNode,
   StoryletBranchNodeData,
+  StoryletNode,
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
 import eventBus, { Event } from '../event';
-import ConditionPanel from './condition_panel';
+import ConditionPanel from './edit_dialog/condition_panel';
 import ActorPart from './edit_dialog/actor_part';
+import ExtraDataPanel from './extra_data/extra_data_panel';
 
 enum Tab {
   BaseConfig = 'Base config',
@@ -24,6 +26,7 @@ function BranchEditDialog() {
   useEffect(() => {
     const showDialog = (data: StoryletBranchNode) => {
       setOpen(true);
+      setCurrentTab(Tab.BaseConfig);
       setForm({
         ...data.data,
         content:
@@ -129,6 +132,17 @@ function BranchEditDialog() {
           </button>
         </div>
       </>
+    );
+  }
+  if (currentTab === Tab.ExtraData) {
+    content = (
+      <ExtraDataPanel
+        sourceNode={sourceNode as StoryletNode<any>}
+        close={() => {
+          setOpen(false);
+          eventBus.emit(Event.CLOSE_DIALOG);
+        }}
+      />
     );
   }
 

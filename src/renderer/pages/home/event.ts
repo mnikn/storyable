@@ -9,6 +9,7 @@ export enum Event {
   SHOW_BRANCH_LINK_EDIT_DIALOG = 'show_branch_link_edit_dialog',
   SHOW_PREVIEW_DIALOG = 'show_preview_dialog',
   SHOW_MOVE_DIALOG = 'show_move_dialog',
+  SHOW_ACTION_EDIT_DIALOG = 'show_action_edit_dialog',
   ON_SHOW_DIALOG = 'ON_SHOW_DIALOG',
   CLOSE_DIALOG = 'close_dialog',
   SELECT_NODE = 'select_node',
@@ -27,6 +28,7 @@ export enum Event {
   ADD_CHILD_BRANCH = 'add_child_branch',
   ADD_CHILD_ACTION = 'add_child_action',
   DELETE_NODE = 'delete_node',
+  DUPLICATE_NODE = 'duplicate_node',
   SAVE = 'save',
 }
 

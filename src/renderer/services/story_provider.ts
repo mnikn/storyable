@@ -24,6 +24,8 @@ import {
   validateValue,
 } from 'renderer/models/schema/schema';
 import { buildSchema } from 'renderer/models/schema/factory';
+import { iterObject } from 'renderer/utils/object';
+import { cloneDeep } from 'lodash';
 
 const OBJ_JSON = {
   type: 'object',
@@ -48,8 +50,8 @@ class StoryProvider {
       root: any;
       sentence: any;
       branch: any;
-      action: any;
     };
+    actionNodeConfig: any[];
   } = {
     i18n: ['en'],
     actors: [],
@@ -57,8 +59,17 @@ class StoryProvider {
       root: OBJ_JSON,
       sentence: OBJ_JSON,
       branch: OBJ_JSON,
-      action: OBJ_JSON,
     },
+    actionNodeConfig: [
+      {
+        type: 'gotoStorylet',
+        schema: OBJ_JSON,
+      },
+      {
+        type: 'empty',
+        schema: OBJ_JSON,
+      },
+    ],
   };
 
   public translations: { [key: string]: { [key: string]: string } } = {};
@@ -141,8 +152,14 @@ class StoryProvider {
       const branchSchema = buildSchema(
         this.projectSettings.extraDataConfig.branch
       );
-      const actionSchema = buildSchema(
-        this.projectSettings.extraDataConfig.action
+      const actionSchemas = this.projectSettings.actionNodeConfig.map(
+        (item) => {
+          return {
+            type: item.type,
+            schema: buildSchema(item.schema),
+            schemaConfig: item.schema,
+          };
+        }
       );
       this.story.storylets.forEach((item) => {
         Object.values(item.data.nodes).forEach((node) => {
@@ -157,8 +174,11 @@ class StoryProvider {
             schemaConfig = this.projectSettings.extraDataConfig.branch;
           }
           if (node instanceof StoryletActionNode) {
-            schema = actionSchema;
-            schemaConfig = this.projectSettings.extraDataConfig.action;
+            const actionItem = actionSchemas.find(
+              (item) => item.type === node.data.actionType
+            );
+            schema = actionItem?.schema || new SchemaFieldObject();
+            schemaConfig = actionItem?.schemaConfig || OBJ_JSON;
           }
           if (node instanceof StoryletInitNode) {
             schema = rootSchema;
@@ -237,6 +257,100 @@ class StoryProvider {
       };
     }
     this.event.emit('change:currentStorylet', this.currentStorylet.clone());
+  }
+
+  public duplicateStoryletNode(
+    targetNode: StoryletNode<any>,
+    parentId?: string
+  ): StoryletNode<any> | null {
+    const originData = targetNode.toJson();
+    let newNode: StoryletNode<any> | null = null;
+    originData.id = 'node_' + generateUUID();
+    iterObject(originData.data.extraData, (k, d) => {
+      if (typeof d === 'string' && this.translations[d]) {
+        const extraTranslations =
+          this.translations[originData.data.extraData[k]];
+        originData.data.extraData[k] = 'extra_field_' + generateUUID();
+        this.updateTranslateKeyAll(
+          originData.data.extraData[k],
+          extraTranslations
+        );
+      }
+    });
+    if (targetNode instanceof StoryletSentenceNode) {
+      const terms = this.translations[originData.data.content];
+      originData.data.content = 'content_' + generateUUID();
+      this.updateTranslateKeyAll(originData.data.content, terms);
+      newNode = StoryletSentenceNode.fromJson(originData);
+    }
+    if (targetNode instanceof StoryletBranchNode) {
+      const terms = this.translations[originData.data.content];
+      originData.data.content = 'content_' + generateUUID();
+      this.updateTranslateKeyAll(originData.data.content, terms);
+      newNode = StoryletBranchNode.fromJson(originData);
+    }
+    if (targetNode instanceof StoryletActionNode) {
+      newNode = StoryletActionNode.fromJson(originData);
+    }
+    if (targetNode instanceof StoryletInitNode) {
+      newNode = StoryletInitNode.fromJson(originData);
+    }
+
+    if (!newNode) {
+      return null;
+    }
+    if (!this.currentStorylet || !parentId) {
+      return newNode;
+    }
+
+    this.currentStorylet.nodes[newNode.id] = newNode;
+    const parent = this.currentStorylet.nodes[parentId];
+    const link = new NodeLink(parent, newNode);
+    this.currentStorylet.links[formatNodeLinkId(parentId, newNode.id)] = link;
+    if (parent instanceof StoryletBranchNode) {
+      link.data = {
+        optionName: 'option_' + generateUUID(),
+        optionId: '',
+      };
+    }
+    this.event.emit('change:currentStorylet', this.currentStorylet.clone());
+    return newNode;
+  }
+
+  public duplicateStorylet(storylet: Storylet) {
+    const newStorylet = new Storylet();
+    newStorylet.id = generateUUID();
+    newStorylet.name =
+      'storylet' + (Object.keys(this.story.storylets).length + 1);
+    newStorylet.conditions = storylet.conditions;
+    const group = this.story.storylets.find(
+      (item) => item.data.id === storylet.id
+    )?.group;
+    if (!group) {
+      return;
+    }
+    const idMapper: any = {};
+    Object.keys(storylet.nodes).forEach((id) => {
+      const data = storylet.nodes[id];
+      const newNode = this.duplicateStoryletNode(data);
+      if (!newNode) {
+        return;
+      }
+      idMapper[id] = newNode.id;
+      newStorylet.nodes[newNode.id] = newNode;
+    });
+
+    Object.keys(storylet.links).forEach((id) => {
+      const link = storylet.links[id];
+      const newSource = newStorylet.nodes[idMapper[link.source.id]];
+      const newTarget = newStorylet.nodes[idMapper[link.target.id]];
+      const newLink = new NodeLink(newSource, newTarget);
+      newLink.data = cloneDeep(link.data);
+      this.duplicateTranslations(newLink.data);
+      newStorylet.links[formatNodeLinkId(newSource.id, newTarget.id)] = newLink;
+    });
+    this.story.addStorylet(newStorylet, group);
+    this.event.emit('change:storylets', [...this.story.storylets]);
   }
 
   public updateStoryletNode(data: StoryletNode<any>) {
@@ -384,6 +498,18 @@ class StoryProvider {
     this.updateTranslations(newTranslations);
   }
 
+  public updateTranslateKeyAll(key: string, val: any) {
+    const newTranslations = { ...this.translations };
+    newTranslations[key] = {
+      ...newTranslations[key],
+    };
+    this.projectSettings.i18n.forEach((lang) => {
+      newTranslations[key][lang] =
+        val[lang] || newTranslations[key]?.[lang] || '';
+    });
+    this.updateTranslations(newTranslations);
+  }
+
   public changeLang(lang: string) {
     this.currentLang = lang;
     this.event.emit('change:currentLang', lang);
@@ -446,6 +572,16 @@ class StoryProvider {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  private duplicateTranslations(data: any, keyPrefix = '') {
+    iterObject(data, (k, d) => {
+      if (typeof d === 'string' && this.translations[d]) {
+        const extraTranslations = this.translations[data[k]];
+        data[k] = keyPrefix + generateUUID();
+        this.updateTranslateKeyAll(data[k], extraTranslations);
+      }
+    });
   }
 }
 

@@ -18,7 +18,7 @@ function NumberConditonItem({
   onChange: (val: NumberCondition) => void;
 }) {
   return (
-    <div className="block mr-2 flex items-center">
+    <div className="mr-2 flex items-center">
       <input
         className="border border-gray-300 w-1/3 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none mr-4"
         placeholder="Param"

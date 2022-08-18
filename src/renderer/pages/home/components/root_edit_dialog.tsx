@@ -4,10 +4,12 @@ import Dialog from 'renderer/components/dialog';
 import {
   StoryletInitNode,
   StoryletInitNodeData,
+  StoryletNode,
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
 import eventBus, { Event } from '../event';
-import ConditionPanel from './condition_panel';
+import ConditionPanel from './edit_dialog/condition_panel';
+import ExtraDataPanel from './extra_data/extra_data_panel';
 
 enum Tab {
   BaseConfig = 'Base config',
@@ -83,6 +85,17 @@ function RootEditDialog() {
           </button>
         </div>
       </>
+    );
+  }
+  if (currentTab === Tab.ExtraData) {
+    content = (
+      <ExtraDataPanel
+        sourceNode={sourceNode as StoryletNode<any>}
+        close={() => {
+          setOpen(false);
+          eventBus.emit(Event.CLOSE_DIALOG);
+        }}
+      />
     );
   }
 

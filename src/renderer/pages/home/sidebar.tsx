@@ -347,6 +347,15 @@ function Sidebar() {
             >
               Rename
             </Item>
+            {menuTriggeredItem instanceof Storylet && (
+              <Item
+                onClick={() => {
+                  StoryProvider.duplicateStorylet(menuTriggeredItem);
+                }}
+              >
+                Duplicate
+              </Item>
+            )}
             <Item
               onClick={() => {
                 eventBus.emit(Event.SHOW_MOVE_DIALOG, menuTriggeredItem);

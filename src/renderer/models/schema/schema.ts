@@ -121,8 +121,15 @@ export function validateValue(
             ?.map((item2) => item2.substring(2, item2.length - 2)) || []
         );
 
+        if (!value) {
+          value = {
+            fields: {},
+            value: '',
+          };
+        }
+
         value.fields = fields.reduce((res: any, k) => {
-          res[k] = value.fields[k] || null;
+          res[k] = value?.fields[k] || null;
           return res;
         }, {});
         let finalValue = schema.config.template;
@@ -222,12 +229,12 @@ export const DEFAULT_CONFIG = {
     codeLang: '',
   },
   STRING_CONFIG_DEFAULT: {
-    colSpan: 3,
+    colSpan: 4,
     defaultValue: '',
     type: 'singleline',
   },
   NUMBER: {
-    colSpan: 3,
+    colSpan: 4,
     enableWhen: null,
     required: false,
     customValidate: null,
@@ -242,7 +249,7 @@ export const DEFAULT_CONFIG = {
     type: 'float', // int | float | percent
   },
   NUMBER_CONFIG_DEFAULT: {
-    colSpan: 3,
+    colSpan: 4,
     defaultValue: 0,
     type: 'float',
   },
@@ -257,7 +264,7 @@ export const DEFAULT_CONFIG = {
   },
   SELECT: {
     enableWhen: null,
-    colSpan: 3,
+    colSpan: 4,
     defaultValue: null,
     required: false,
     clearable: false,
@@ -269,7 +276,7 @@ export const DEFAULT_CONFIG = {
     ],
   },
   SELECT_CONFIG_DEFAULT: {
-    colSpan: 3,
+    colSpan: 4,
     options: [
       {
         label: 'None',
@@ -287,7 +294,7 @@ export abstract class SchemaField {
     defaultValue?: any;
     [key: string]: any;
   } = {
-    colSpan: 3,
+    colSpan: 4,
     enableWhen: null,
   };
 

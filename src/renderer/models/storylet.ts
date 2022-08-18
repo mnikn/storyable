@@ -15,7 +15,8 @@ export interface StoryletNodeData {
   extraData: any;
   enableConditions: Condition[];
 }
-export class StoryletNode<D extends StoryletNodeData> extends Node<D> {}
+export class StoryletNode<D extends StoryletNodeData> extends Node<D> {
+}
 
 // init node
 export interface StoryletInitNodeData extends StoryletNodeData {}
@@ -110,14 +111,24 @@ export enum ActionType {
 export interface StoryletActionNodeData extends StoryletNodeData {
   actionType: string;
 }
-export abstract class StoryletActionNode extends StoryletNode<StoryletActionNodeData> {
+export class StoryletActionNode extends StoryletNode<StoryletActionNodeData> {
   constructor() {
     super();
     this.data = {
       type: NodeType.Action,
-      actionType: ActionType.Unknown,
+      actionType: '',
       enableConditions: [],
+      extraData: {},
     };
+  }
+
+  static fromJson(json: any): StoryletEmptyActionNode {
+    const instance = new StoryletEmptyActionNode();
+    instance.id = json.id;
+    instance.data.actionType = json.data.actionType;
+    instance.data.extraData = json.data.extraData;
+    instance.data.enableConditions = json.data.enableConditions;
+    return instance;
   }
 }
 
@@ -224,13 +235,7 @@ export class Storylet extends Tree<StoryletNodeData> {
       } else if (nodeType === NodeType.Branch) {
         instance = StoryletBranchNode.fromJson(nodeData);
       } else if (nodeType === NodeType.Action) {
-        if (json.nodes[k].data.actionType === ActionType.Empty) {
-          instance = StoryletEmptyActionNode.fromJson(nodeData);
-        } else if (
-          json.nodes[k].data.actionType === ActionType.SwitchToMatchStorylet
-        ) {
-          instance = StoryletSwitchToMatchStoryletActionNode.fromJson(nodeData);
-        }
+        instance = StoryletActionNode.fromJson(nodeData);
       } else if (nodeType === NodeType.Init) {
         instance = StoryletInitNode.fromJson(nodeData);
       }

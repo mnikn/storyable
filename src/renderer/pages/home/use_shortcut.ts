@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react';
 import {
+  StoryletActionNode,
   StoryletBranchNode,
   StoryletInitNode,
   StoryletSentenceNode,
@@ -23,6 +24,7 @@ function useShortcut({
         return;
       }
 
+      e.preventDefault();
       // switch lang shortcut
       if (e.code.includes('Digit') && e.ctrlKey) {
         const index = Number(e.code.split('Digit')[1]) - 1;
@@ -45,7 +47,6 @@ function useShortcut({
       }
       const parent = currentStorylet.getNodeSingleParent(selectingNode);
       if (e.code === 'Tab') {
-        e.preventDefault();
         if (e.ctrlKey) {
           if (e.shiftKey) {
             eventBus.emit(Event.ADD_CHILD_ACTION);
@@ -72,7 +73,22 @@ function useShortcut({
           eventBus.emit(Event.SHOW_BRANCH_EDIT_DIALOG, currentSelectingNode);
         } else if (currentSelectingNode instanceof StoryletInitNode) {
           eventBus.emit(Event.SHOW_ROOT_EDIT_DIALOG, currentSelectingNode);
+        } else if (currentSelectingNode instanceof StoryletActionNode) {
+          eventBus.emit(Event.SHOW_ACTION_EDIT_DIALOG, currentSelectingNode);
         }
+      }
+
+      if (e.code === 'KeyD') {
+        eventBus.emit(
+          Event.DUPLICATE_NODE,
+          currentSelectingNode,
+          e.altKey
+            ? StoryProvider.currentStorylet?.getNodeSingleParent(
+                currentSelectingNode.id
+              )?.id || ''
+            : currentSelectingNode.id
+        );
+        return;
       }
 
       if (

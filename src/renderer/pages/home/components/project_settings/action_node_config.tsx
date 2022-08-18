@@ -31,7 +31,7 @@ const ARR_JSON = {
   config: DEFAULT_CONFIG.ARRAY_CONFIG_DEFAULT,
 };
 
-function ExtraDataConfigPanel({ close }: { close: () => void }) {
+function ActionNodeConfigPanel({ close }: { close: () => void }) {
   const [editor, setEditor] = useState<any>(null);
   const projectSettings = useEventState<any>({
     event: StoryProvider.event,
@@ -41,7 +41,7 @@ function ExtraDataConfigPanel({ close }: { close: () => void }) {
   const [config, setConfig] = useState<string>('');
 
   useEffect(() => {
-    const str = JSON.stringify(projectSettings?.extraDataConfig || {}, null, 4);
+    const str = JSON.stringify(projectSettings?.actionNodeConfig || [], null, 4);
     setConfig(str);
   }, [projectSettings]);
 
@@ -235,7 +235,7 @@ function ExtraDataConfigPanel({ close }: { close: () => void }) {
           type="button"
           className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
           onClick={() => {
-            projectSettings.extraDataConfig = JSON.parse(config);
+            projectSettings.actionNodeConfig = JSON.parse(config);
             StoryProvider.updateProjectSettings(projectSettings);
             close();
           }}
@@ -254,4 +254,4 @@ function ExtraDataConfigPanel({ close }: { close: () => void }) {
   );
 }
 
-export default ExtraDataConfigPanel;
+export default ActionNodeConfigPanel;

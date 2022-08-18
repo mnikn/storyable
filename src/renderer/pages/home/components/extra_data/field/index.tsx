@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   SchemaField,
   SchemaFieldArray,
+  SchemaFieldNumber,
   SchemaFieldObject,
   SchemaFieldSelect,
   SchemaFieldString,
@@ -11,6 +12,7 @@ import {
 import StoryProvider from 'renderer/services/story_provider';
 import useEventState from 'renderer/utils/use_event_state';
 import { generateUUID } from 'renderer/utils/uuid';
+import FieldNumber from './number_field';
 import FieldSelect from './select_field';
 import FieldString from './string_field';
 
@@ -66,6 +68,24 @@ export function FieldContainer({
             );
           }
 
+          if (item.data.type === SchemaFieldType.Number) {
+            return (
+              <div
+                style={{
+                  gridColumn: `span ${item.data.config.colSpan} / span ${item.data.config.colSpan}`,
+                }}
+                key={item.id}
+              >
+                <FieldNumber
+                  label={item.name || item.id}
+                  schema={item.data as SchemaFieldNumber}
+                  value={value[item.id]}
+                  onValueChange={(v) => objectValueChange(v, item.id)}
+                />
+              </div>
+            );
+          }
+
           if (item.data.type === SchemaFieldType.Select) {
             return (
               <div
@@ -96,6 +116,24 @@ export function FieldContainer({
       >
         <FieldString
           schema={schema as SchemaFieldString}
+          value={value}
+          onValueChange={(v) => {
+            if (onValueChange) {
+              onValueChange(v);
+            }
+          }}
+        />
+      </div>
+    );
+  } else if (schema.type === SchemaFieldType.Number) {
+    return (
+      <div
+        style={{
+          gridColumn: `span ${schema.config.colSpan} / span ${schema.config.colSpan}`,
+        }}
+      >
+        <FieldNumber
+          schema={schema as SchemaFieldNumber}
           value={value}
           onValueChange={(v) => {
             if (onValueChange) {

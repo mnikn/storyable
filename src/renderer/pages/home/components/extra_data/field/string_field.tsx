@@ -2,6 +2,85 @@ import { useEffect, useState } from 'react';
 import { SchemaFieldString } from 'renderer/models/schema/schema';
 import useEventState from 'renderer/utils/use_event_state';
 import StoryProvider from 'renderer/services/story_provider';
+import MonacoEditor from 'react-monaco-editor';
+import { get, uniq } from 'lodash';
+
+const CodeFieldSchema = new SchemaFieldString();
+
+const Editor = ({
+  schema,
+  contentValue,
+  onValueChange,
+}: {
+  schema: SchemaFieldString;
+  contentValue: any;
+  onValueChange?: (value: any) => void;
+}) => {
+  const fields = uniq(
+    (schema.config.template || '')
+      .match(/(\{{2}\w*\}{2})/g)
+      ?.map((item) => item.substring(2, item.length - 2)) || []
+  );
+
+  let finalValue = !schema.config.template
+    ? contentValue.value
+    : schema.config.template || '';
+  if (schema.config.template) {
+    fields.forEach((f) => {
+      finalValue = finalValue.replaceAll(
+        `{{${f}}}`,
+        contentValue.fields[f] || `{{${f}}}`
+      );
+    });
+  }
+
+  return (
+    <div className="flex w-full">
+      <MonacoEditor
+        width="100%"
+        height={schema.config.height}
+        language={schema.config.codeLang}
+        theme="vs-dark"
+        value={finalValue}
+        options={{
+          readOnly: !!schema.config.template,
+        }}
+        onChange={(v) => {
+          if (onValueChange) {
+            onValueChange({
+              fields: [],
+              value: v,
+            });
+          }
+        }}
+      />
+      {fields.length > 0 && (
+        <div className="flex flex-col ml-2">
+          {fields.map((f) => {
+            return (
+              <FieldString
+                label={f}
+                schema={CodeFieldSchema}
+                value={contentValue.fields[f] || ''}
+                onValueChange={(v) => {
+                  if (onValueChange) {
+                    onValueChange({
+                      fields: { ...contentValue.fields, [f]: v },
+                      value: (schema.config.template || '').replaceAll(
+                        `{{${f}}}`,
+                        v
+                      ),
+                    });
+                  }
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 function FieldString({
   label,
@@ -96,9 +175,23 @@ function FieldString({
           }}
         />
       )}
-      {/* <div className="bottom">
-          {errorText && <div className="error">{errorText}</div>}
-          </div> */}
+      {schema.config.type === 'code' && (
+        <Editor
+          schema={schema}
+          contentValue={contentValue}
+          onValueChange={(v) => {
+            setContentValue(v);
+            if (onValueChange) {
+              onValueChange(v);
+            }
+          }}
+        />
+      )}
+      <div className="absoulte bottom-0">
+        {errorText && (
+          <div className="error text-rose-500 text-sm">{errorText}</div>
+        )}
+      </div>
     </div>
   );
 }

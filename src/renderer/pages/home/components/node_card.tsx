@@ -1,22 +1,28 @@
-import { StoryletGroup } from 'renderer/models/story';
+import classNames from 'classnames';
 import * as d3 from 'd3';
+import { get } from 'lodash';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { buildSchema } from 'renderer/models/schema/factory';
 import {
   NodeType,
   Storylet,
   StoryletActionNode,
   StoryletBranchNode,
-  StoryletEmptyActionNode,
   StoryletInitNode,
   StoryletSentenceNode,
 } from 'renderer/models/storylet';
-import useEventState from 'renderer/utils/use_event_state';
 import StoryProvider from 'renderer/services/story_provider';
-import eventBus, { Event } from '../event';
+import useEventState from 'renderer/utils/use_event_state';
 import Context from '../context';
-import classNames from 'classnames';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import eventBus, { Event } from '../event';
 import NodeActionMenu from './node_action_menu';
-import { EVENT } from 'react-contexify/dist/constants';
 
 function NodeCard({
   pos,
@@ -129,18 +135,11 @@ function NodeCard({
       StoryProvider.addStoryletNode(newNode, currentNodeData);
     };
 
-    const deleteNode = () => {
-      if (selectingNode !== nodeId) {
-        return;
-      }
-      StoryProvider.deleteStoryletNode(nodeId);
-    };
-
     const addChildAction = () => {
       if (selectingNode !== nodeId) {
         return;
       }
-      const newNode = new StoryletEmptyActionNode();
+      const newNode = new StoryletActionNode();
       const currentNodeData = currentStorylet?.nodes[nodeId];
       if (!currentNodeData) {
         return;
@@ -152,13 +151,11 @@ function NodeCard({
     eventBus.on(Event.ADD_CHILD_SENTENCE, addChildSentence);
     eventBus.on(Event.ADD_CHILD_BRANCH, addChildBranch);
     eventBus.on(Event.ADD_CHILD_ACTION, addChildAction);
-    eventBus.on(Event.DELETE_NODE, deleteNode);
     return () => {
       eventBus.off(Event.QUICK_EDIT_SUBMIT, submit);
       eventBus.off(Event.ADD_CHILD_SENTENCE, addChildSentence);
       eventBus.off(Event.ADD_CHILD_BRANCH, addChildBranch);
       eventBus.off(Event.ADD_CHILD_ACTION, addChildAction);
-      eventBus.off(Event.DELETE_NODE, deleteNode);
     };
   }, [selectingNode, nodeId]);
 
@@ -193,11 +190,41 @@ function NodeCard({
     [selectingNode, nodeId]
   );
 
+  const actionSummary = useMemo(() => {
+    if (!(nodeData instanceof StoryletActionNode)) {
+      return '';
+    }
+    const schemaItem = StoryProvider.projectSettings.actionNodeConfig
+      .map((item: any) => {
+        return {
+          type: item.type,
+          schema: buildSchema(item.schema),
+          schemaConfig: item.schema,
+        };
+      })
+      .find((item) => item.type === nodeData.data.actionType);
+    if (!schemaItem) {
+      return '';
+    }
+    return schemaItem.schema.config.summary.replace(
+      /\{\{[A-Za-z0-9_.\[\]]+\}\}/g,
+      (all) => {
+        const word = all.substring(2, all.length - 2);
+        const v = get(nodeData.data.extraData, word, '');
+        if (typeof v === 'string' && StoryProvider.translations[v]) {
+          return StoryProvider.translations[v]?.[currentLang];
+        }
+        return v;
+      }
+    );
+  }, [nodeData]);
+
   if (!nodeData) {
     return null;
   }
 
   const isSelecting = selectingNode === nodeId;
+
   return (
     <>
       {nodeData instanceof StoryletInitNode && (
@@ -386,7 +413,7 @@ function NodeCard({
       {nodeData instanceof StoryletActionNode && (
         <div
           className={classNames(
-            'absolute bg-rose-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-blue-200 cursor-pointer transition-all select-none',
+            'absolute bg-rose-400 rounded-xl p-12 hover:bg-rose-200 cursor-pointer transition-all select-none',
             {
               'bg-rose-200': isSelecting,
             }
@@ -404,6 +431,23 @@ function NodeCard({
           }}
           ref={dragListen}
         >
+          <div className="flex flex-col items-center">
+            <div className="text-3xl font-bold mb-5">
+              {nodeData.data.actionType}
+            </div>
+            <div
+              className="text-2xl"
+              style={{
+                lineClamp: 3,
+                display: '-webkit-box',
+                overflow: 'hidden',
+                boxOrient: 'vertical',
+                wordBreak: 'break-all',
+              }}
+            >
+              {actionSummary}
+            </div>
+          </div>
           <NodeActionMenu
             visible={isSelecting && !dragingNode}
             sourceNode={nodeData}

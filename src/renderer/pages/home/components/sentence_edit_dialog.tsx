@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import Dialog from 'renderer/components/dialog';
 import {
+  StoryletNode,
   StoryletSentenceNode,
   StoryletSentenceNodeData,
 } from 'renderer/models/storylet';
@@ -9,7 +10,7 @@ import StoryProvider from 'renderer/services/story_provider';
 import useEventState from 'renderer/utils/use_event_state';
 import Select, { components } from 'react-select';
 import eventBus, { Event } from '../event';
-import ConditionPanel from './condition_panel';
+import ConditionPanel from './edit_dialog/condition_panel';
 import ExtraDataPanel from './extra_data/extra_data_panel';
 
 enum Tab {
@@ -43,6 +44,7 @@ function SentenceEditDialog() {
   useEffect(() => {
     const showDialog = (data: StoryletSentenceNode) => {
       setOpen(true);
+      setCurrentTab(Tab.BaseConfig);
       setForm({
         ...data.data,
         content:
@@ -249,7 +251,7 @@ function SentenceEditDialog() {
   if (currentTab === Tab.ExtraData) {
     content = (
       <ExtraDataPanel
-        sourceNode={sourceNode}
+        sourceNode={sourceNode as StoryletNode<any>}
         close={() => {
           setOpen(false);
           eventBus.emit(Event.CLOSE_DIALOG);

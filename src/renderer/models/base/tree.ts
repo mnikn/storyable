@@ -1,4 +1,5 @@
 import { generateUUID } from '../../utils/uuid';
+import { cloneDeep } from 'lodash';
 
 export function formatNodeLinkId(from: string, target: string) {
   return `${from}-${target}`;
@@ -56,7 +57,7 @@ export class Node<T> {
   public toJson(): any {
     return {
       id: this.id,
-      data: this.data,
+      data: cloneDeep(this.data),
     };
   }
 

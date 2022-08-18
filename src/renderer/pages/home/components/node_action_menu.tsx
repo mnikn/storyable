@@ -1,5 +1,6 @@
 import { CgAddR, CgPen, CgRemoveR } from 'react-icons/cg';
 import {
+  StoryletActionNode,
   StoryletBranchNode,
   StoryletInitNode,
   StoryletNode,
@@ -79,6 +80,8 @@ function NodeActionMenu({
             eventBus.emit(Event.SHOW_BRANCH_EDIT_DIALOG, sourceNode);
           } else if (sourceNode instanceof StoryletInitNode) {
             eventBus.emit(Event.SHOW_ROOT_EDIT_DIALOG, sourceNode);
+          } else if (sourceNode instanceof StoryletActionNode) {
+            eventBus.emit(Event.SHOW_ACTION_EDIT_DIALOG, sourceNode);
           }
         }}
       >

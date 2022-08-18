@@ -1,14 +1,14 @@
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import { CgArrowDownO, CgArrowUpO, CgMathPlus, CgRemove } from 'react-icons/cg';
-import Dialog from 'renderer/components/dialog';
 import ImageUploading from 'react-images-uploading';
-import StoryProvider from '../../../services/story_provider';
-import eventBus, { Event } from '../event';
-import { generateUUID } from 'renderer/utils/uuid';
+import Dialog from 'renderer/components/dialog';
 import useEventState from 'renderer/utils/use_event_state';
-import MonacoEditor from 'react-monaco-editor';
-import ExtraDataConfigPanel from './project_settings/extra_data_config';
+import { generateUUID } from 'renderer/utils/uuid';
+import StoryProvider from 'renderer/services/story_provider';
+import eventBus, { Event } from '../../event';
+import ExtraDataConfigPanel from '../edit_dialog/extra_data_config';
+import ActionNodeConfigPanel from './action_node_config';
 
 enum Tab {
   I18n = 'I18n',
@@ -427,6 +427,14 @@ function ProjectSettingsDialog() {
         )}
         {currentTab === Tab.ExtraDataConfig && (
           <ExtraDataConfigPanel
+            close={() => {
+              setOpen(false);
+              eventBus.emit(Event.CLOSE_DIALOG);
+            }}
+          />
+        )}
+        {currentTab === Tab.ActionNodeSettings && (
+          <ActionNodeConfigPanel
             close={() => {
               setOpen(false);
               eventBus.emit(Event.CLOSE_DIALOG);

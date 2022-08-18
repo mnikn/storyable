@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import {
+  SchemaField,
   SchemaFieldObject,
   SchemaFieldString,
+  validateValue,
 } from 'renderer/models/schema/schema';
 import {
   StoryletActionNode,
   StoryletBranchNode,
+  StoryletInitNode,
   StoryletNode,
   StoryletSentenceNode,
 } from 'renderer/models/storylet';
@@ -16,10 +19,16 @@ import { buildSchema } from 'renderer/models/schema/factory';
 
 function ExtraDataPanel({
   sourceNode,
+  actionType,
   close,
+  children,
+  onSubmit,
 }: {
   sourceNode: StoryletNode<any>;
+  actionType?: string;
   close: () => void;
+  children?: ReactNode;
+  onSubmit?: () => void;
 }) {
   const [form, setForm] = useState<any>(sourceNode.data.extraData || {});
   const [schema, setSchema] = useState<SchemaFieldObject>(
@@ -38,6 +47,12 @@ function ExtraDataPanel({
       ) as SchemaFieldObject;
       setSchema(s);
     }
+    if (sourceNode instanceof StoryletInitNode) {
+      const s = buildSchema(
+        projectSettings.extraDataConfig.root
+      ) as SchemaFieldObject;
+      setSchema(s);
+    }
     if (sourceNode instanceof StoryletBranchNode) {
       const s = buildSchema(
         projectSettings.extraDataConfig.branch
@@ -45,16 +60,28 @@ function ExtraDataPanel({
       setSchema(s);
     }
     if (sourceNode instanceof StoryletActionNode) {
-      const s = buildSchema(
-        projectSettings.extraDataConfig.action
-      ) as SchemaFieldObject;
-      setSchema(s);
+      const schemaItem = StoryProvider.projectSettings.actionNodeConfig
+        .map((item: any) => {
+          return {
+            type: item.type,
+            schema: buildSchema(item.schema),
+            schemaConfig: item.schema,
+          };
+        })
+        .find((item) => item.type === actionType);
+
+      const s = schemaItem?.schema || new SchemaFieldObject();
+      setSchema(s as SchemaFieldObject);
+      setForm((prev: any) => {
+        return validateValue(prev, prev, s, schemaItem);
+      });
     }
-  }, [projectSettings]);
+  }, [projectSettings, actionType]);
 
   return (
-    <div className="w-full flex flex-col p-2 h-full overflow-auto">
-      <div className="p-2 mb-4 flex-grow flex flex-col">
+    <div className="w-full flex flex-col p-2 h-full">
+      {children}
+      <div className="p-2 mb-4 flex-grow flex flex-col h-96 overflow-auto">
         <FieldContainer
           schema={schema}
           value={form}
@@ -70,6 +97,9 @@ function ExtraDataPanel({
           onClick={() => {
             sourceNode.data.extraData = form;
             StoryProvider.updateStoryletNode(sourceNode);
+            if (onSubmit) {
+              onSubmit();
+            }
             close();
           }}
         >

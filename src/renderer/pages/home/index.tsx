@@ -11,12 +11,13 @@ import { StoryletInitNode, StoryletNode } from 'renderer/models/storylet';
 import SentenceEditDialog from './components/sentence_edit_dialog';
 import BranchEditDialog from './components/branch_edit_dialog';
 import TopMenu from './top_menu';
-import ProjectSettingsDialog from './components/project_settings_dialog';
+import ProjectSettingsDialog from './components/project_settings';
 import BranchLinkEditDialog from './components/branch_link_edit_dialog';
 import { CgShapeHalfCircle } from 'react-icons/cg';
 import PreviewDialog from './components/preview_dialog';
 import MoveDialog from './move_dialog';
 import RootEditDialog from './components/root_edit_dialog';
+import ActionEditDialog from './components/action_edit_dialog';
 
 function Home() {
   const [zoomDom, setZoomDom] = useState<HTMLDivElement | null>(null);
@@ -80,6 +81,7 @@ function Home() {
       const parent = currentStorylet.getNodeSingleParent(
         currentSelectingNode.id
       );
+      StoryProvider.deleteStoryletNode(currentSelectingNode.id);
       if (parent) {
         const children = currentStorylet.getNodeChildren(parent.id);
         const index = children.findIndex((node) => {
@@ -147,6 +149,13 @@ function Home() {
       dragTargetRef.current = null;
     };
 
+    const duplicateNode = (node: StoryletNode<any>, parentId: string) => {
+      const newNode = StoryProvider.duplicateStoryletNode(node, parentId);
+      if (newNode) {
+        eventBus.emit(Event.SELECT_NODE, newNode.id);
+      }
+    };
+
     eventBus.on(Event.SELECT_NODE, onSelectNode);
     eventBus.on(Event.DESELECT_NODE, onDeselect);
     eventBus.on(Event.QUICK_EDIT_START, onQuickEditStart);
@@ -158,11 +167,13 @@ function Home() {
     eventBus.on(Event.SHOW_BRANCH_LINK_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_PREVIEW_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_SIDEBAR_RENAME_DIALOG, onDialogShow);
+    eventBus.on(Event.SHOW_ACTION_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_ROOT_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.ON_SHOW_DIALOG, onDialogShow);
     eventBus.on(Event.CLOSE_DIALOG, onDialogClose);
     eventBus.on(Event.DRAG_NODE, onDragNode);
     eventBus.on(Event.END_DRAG_NODE, onDragEnd);
+    eventBus.on(Event.DUPLICATE_NODE, duplicateNode);
     eventBus.on(Event.SAVE, onSave);
     return () => {
       eventBus.off(Event.SELECT_NODE, onSelectNode);
@@ -175,11 +186,13 @@ function Home() {
       eventBus.off(Event.SHOW_BRANCH_LINK_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_PREVIEW_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_SIDEBAR_RENAME_DIALOG, onDialogShow);
+      eventBus.off(Event.SHOW_ACTION_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_ROOT_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.ON_SHOW_DIALOG, onDialogShow);
       eventBus.off(Event.CLOSE_DIALOG, onDialogClose);
       eventBus.off(Event.DRAG_NODE, onDragNode);
       eventBus.off(Event.END_DRAG_NODE, onDragEnd);
+      eventBus.off(Event.DUPLICATE_NODE, duplicateNode);
       eventBus.off(Event.SAVE, onSave);
     };
   }, [zoom]);
@@ -289,6 +302,7 @@ function Home() {
       <SentenceEditDialog />
       <BranchEditDialog />
       <BranchLinkEditDialog />
+      <ActionEditDialog />
       <ProjectSettingsDialog />
       <RootEditDialog />
       <PreviewDialog />
