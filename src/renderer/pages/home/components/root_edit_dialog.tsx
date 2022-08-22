@@ -2,8 +2,8 @@ import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import Dialog from 'renderer/components/dialog';
 import {
-  StoryletInitNode,
-  StoryletInitNodeData,
+  StoryletRootNode,
+  StoryletRootNodeData,
   StoryletNode,
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
@@ -18,12 +18,12 @@ enum Tab {
 
 function RootEditDialog() {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<StoryletInitNodeData | null>(null);
-  const [sourceNode, setSourceNode] = useState<StoryletInitNode | null>(null);
+  const [form, setForm] = useState<StoryletRootNodeData | null>(null);
+  const [sourceNode, setSourceNode] = useState<StoryletRootNode | null>(null);
   const [currentTab, setCurrentTab] = useState<Tab>(Tab.BaseConfig);
 
   useEffect(() => {
-    const showDialog = (data: StoryletInitNode) => {
+    const showDialog = (data: StoryletRootNode) => {
       setOpen(true);
       setForm({
         ...data.data,

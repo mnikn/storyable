@@ -3,10 +3,10 @@ import { Node, NodeLink, Tree } from './base/tree';
 import { Condition } from './condition';
 
 export enum NodeType {
-  Init = 'init',
+  Root = 'root',
   Sentence = 'sentence',
   Branch = 'branch',
-  Action = 'action',
+  Custom = 'custom',
 }
 
 // base node
@@ -19,19 +19,19 @@ export class StoryletNode<D extends StoryletNodeData> extends Node<D> {
 }
 
 // init node
-export interface StoryletInitNodeData extends StoryletNodeData {}
-export class StoryletInitNode extends StoryletNode<StoryletInitNodeData> {
+export interface StoryletRootNodeData extends StoryletNodeData {}
+export class StoryletRootNode extends StoryletNode<StoryletRootNodeData> {
   constructor() {
     super();
     this.data = {
-      type: NodeType.Init,
+      type: NodeType.Root,
       enableConditions: [],
       extraData: {},
     };
   }
 
   static fromJson(json: any): Node<any> {
-    const instance = new StoryletInitNode();
+    const instance = new StoryletRootNode();
     instance.id = json.id;
     instance.data.enableConditions = json.data.enableConditions;
     instance.data.extraData = json.data.extraData || {};
@@ -101,73 +101,27 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
   }
 }
 
-export enum ActionType {
-  Unknown = 'unknown',
-  Empty = 'empty',
-  SwitchToMatchStorylet = 'switch_to_match_storylet',
-}
-
 // action node
-export interface StoryletActionNodeData extends StoryletNodeData {
-  actionType: string;
+export interface StoryletCustomNodeData extends StoryletNodeData {
+  customType: string;
 }
-export class StoryletActionNode extends StoryletNode<StoryletActionNodeData> {
+export class StoryletCustomNode extends StoryletNode<StoryletCustomNodeData> {
   constructor() {
     super();
     this.data = {
-      type: NodeType.Action,
-      actionType: '',
+      type: NodeType.Custom,
+      customType: '',
       enableConditions: [],
       extraData: {},
     };
   }
 
-  static fromJson(json: any): StoryletEmptyActionNode {
-    const instance = new StoryletEmptyActionNode();
+  static fromJson(json: any): StoryletCustomNode {
+    const instance = new StoryletCustomNode();
     instance.id = json.id;
-    instance.data.actionType = json.data.actionType;
+    instance.data.customType = json.data.customType;
     instance.data.extraData = json.data.extraData;
     instance.data.enableConditions = json.data.enableConditions;
-    return instance;
-  }
-}
-
-export class StoryletEmptyActionNode extends StoryletActionNode {
-  constructor() {
-    super();
-    this.data = {
-      type: NodeType.Action,
-      actionType: ActionType.Empty,
-      enableConditions: [],
-      extraData: {},
-    };
-  }
-
-  static fromJson(json: any): StoryletEmptyActionNode {
-    const instance = new StoryletEmptyActionNode();
-    instance.id = json.id;
-    instance.data.enableConditions = json.data.enableConditions;
-    instance.data.extraData = json.data.extraData || {};
-    return instance;
-  }
-}
-
-export interface StoryletSwitchToMatchStoryletActionNodeData
-  extends StoryletActionNodeData {}
-
-export class StoryletSwitchToMatchStoryletActionNode extends StoryletNode<StoryletSwitchToMatchStoryletActionNodeData> {
-  constructor() {
-    super();
-    if (this.data) {
-      this.data.actionType = ActionType.SwitchToMatchStorylet;
-    }
-  }
-
-  static fromJson(json: any): StoryletEmptyActionNode {
-    const instance = new StoryletEmptyActionNode();
-    instance.id = json.id;
-    instance.data.enableConditions = json.data.enableConditions;
-    instance.data.extraData = json.data.extraData || {};
     return instance;
   }
 }
@@ -179,7 +133,7 @@ export class Storylet extends Tree<StoryletNodeData> {
 
   constructor() {
     super();
-    const node = new StoryletInitNode();
+    const node = new StoryletRootNode();
     this.upsertNode(node);
   }
 
@@ -234,10 +188,10 @@ export class Storylet extends Tree<StoryletNodeData> {
         instance = StoryletSentenceNode.fromJson(nodeData);
       } else if (nodeType === NodeType.Branch) {
         instance = StoryletBranchNode.fromJson(nodeData);
-      } else if (nodeType === NodeType.Action) {
-        instance = StoryletActionNode.fromJson(nodeData);
-      } else if (nodeType === NodeType.Init) {
-        instance = StoryletInitNode.fromJson(nodeData);
+      } else if (nodeType === NodeType.Custom) {
+        instance = StoryletCustomNode.fromJson(nodeData);
+      } else if (nodeType === NodeType.Root) {
+        instance = StoryletRootNode.fromJson(nodeData);
       }
       if (instance) {
         res[k] = instance;

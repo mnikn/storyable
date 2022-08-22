@@ -3,6 +3,7 @@ import { Menu, Item, Separator, useContextMenu } from 'react-contexify';
 import eventBus, { Event } from './event';
 import useEventState from 'renderer/utils/use_event_state';
 import StoryProvider from 'renderer/services/story_provider';
+import { PROJECT_PATH } from 'renderer/constatnts/storage_key';
 
 const MENU_ID = 'top-menu';
 function TopMenu() {
@@ -62,9 +63,33 @@ function TopMenu() {
       </div>
 
       <Menu id={MENU_ID}>
-        <Item>New</Item>
-        <Item>Open</Item>
-        <Item>Save</Item>
+        <Item
+          onClick={() => {
+            localStorage.clear();
+            window.location.reload();
+          }}
+        >
+          New
+        </Item>
+        <Item
+          onClick={async () => {
+            const { res } = await window.electron.ipcRenderer.call('openFile', {
+              extensions: ['st'],
+            });
+            localStorage.clear();
+            localStorage.setItem(PROJECT_PATH, res.filePath[0]);
+            window.location.reload();
+          }}
+        >
+          Open
+        </Item>
+        <Item
+          onClick={() => {
+            eventBus.emit(Event.SAVE);
+          }}
+        >
+          Save
+        </Item>
         <Separator />
         <Item
           onClick={() => {

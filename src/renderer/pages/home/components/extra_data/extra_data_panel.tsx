@@ -6,9 +6,9 @@ import {
   validateValue,
 } from 'renderer/models/schema/schema';
 import {
-  StoryletActionNode,
+  StoryletCustomNode,
   StoryletBranchNode,
-  StoryletInitNode,
+  StoryletRootNode,
   StoryletNode,
   StoryletSentenceNode,
 } from 'renderer/models/storylet';
@@ -19,13 +19,13 @@ import { buildSchema } from 'renderer/models/schema/factory';
 
 function ExtraDataPanel({
   sourceNode,
-  actionType,
+  customType,
   close,
   children,
   onSubmit,
 }: {
   sourceNode: StoryletNode<any>;
-  actionType?: string;
+  customType?: string;
   close: () => void;
   children?: ReactNode;
   onSubmit?: () => void;
@@ -47,7 +47,7 @@ function ExtraDataPanel({
       ) as SchemaFieldObject;
       setSchema(s);
     }
-    if (sourceNode instanceof StoryletInitNode) {
+    if (sourceNode instanceof StoryletRootNode) {
       const s = buildSchema(
         projectSettings.extraDataConfig.root
       ) as SchemaFieldObject;
@@ -59,8 +59,8 @@ function ExtraDataPanel({
       ) as SchemaFieldObject;
       setSchema(s);
     }
-    if (sourceNode instanceof StoryletActionNode) {
-      const schemaItem = StoryProvider.projectSettings.actionNodeConfig
+    if (sourceNode instanceof StoryletCustomNode) {
+      const schemaItem = StoryProvider.projectSettings.customNodeConfig
         .map((item: any) => {
           return {
             type: item.type,
@@ -68,7 +68,7 @@ function ExtraDataPanel({
             schemaConfig: item.schema,
           };
         })
-        .find((item) => item.type === actionType);
+        .find((item) => item.type === customType);
 
       const s = schemaItem?.schema || new SchemaFieldObject();
       setSchema(s as SchemaFieldObject);
@@ -76,10 +76,10 @@ function ExtraDataPanel({
         return validateValue(prev, prev, s, schemaItem);
       });
     }
-  }, [projectSettings, actionType]);
+  }, [projectSettings, customType]);
 
   return (
-    <div className="w-full flex flex-col p-2 h-full">
+    <div className="w-full flex flex-col h-full">
       {children}
       <div className="p-2 mb-4 flex-grow flex flex-col h-96 overflow-auto">
         <FieldContainer

@@ -9,9 +9,9 @@ import { formatNodeLinkId, NodeLink } from '../models/base/tree';
 import { Story, StoryletGroup } from '../models/story';
 import {
   Storylet,
-  StoryletActionNode,
+  StoryletCustomNode,
   StoryletBranchNode,
-  StoryletInitNode,
+  StoryletRootNode,
   StoryletNode,
   StoryletSentenceNode,
 } from '../models/storylet';
@@ -51,7 +51,7 @@ class StoryProvider {
       sentence: any;
       branch: any;
     };
-    actionNodeConfig: any[];
+    customNodeConfig: any[];
   } = {
     i18n: ['en'],
     actors: [],
@@ -60,11 +60,7 @@ class StoryProvider {
       sentence: OBJ_JSON,
       branch: OBJ_JSON,
     },
-    actionNodeConfig: [
-      {
-        type: 'gotoStorylet',
-        schema: OBJ_JSON,
-      },
+    customNodeConfig: [
       {
         type: 'empty',
         schema: OBJ_JSON,
@@ -152,7 +148,7 @@ class StoryProvider {
       const branchSchema = buildSchema(
         this.projectSettings.extraDataConfig.branch
       );
-      const actionSchemas = this.projectSettings.actionNodeConfig.map(
+      const actionSchemas = this.projectSettings.customNodeConfig.map(
         (item) => {
           return {
             type: item.type,
@@ -173,14 +169,14 @@ class StoryProvider {
             schema = branchSchema;
             schemaConfig = this.projectSettings.extraDataConfig.branch;
           }
-          if (node instanceof StoryletActionNode) {
-            const actionItem = actionSchemas.find(
-              (item) => item.type === node.data.actionType
+          if (node instanceof StoryletCustomNode) {
+            const customItem = actionSchemas.find(
+              (item) => item.type === node.data.customType
             );
-            schema = actionItem?.schema || new SchemaFieldObject();
-            schemaConfig = actionItem?.schemaConfig || OBJ_JSON;
+            schema = customItem?.schema || new SchemaFieldObject();
+            schemaConfig = customItem?.schemaConfig || OBJ_JSON;
           }
-          if (node instanceof StoryletInitNode) {
+          if (node instanceof StoryletRootNode) {
             schema = rootSchema;
             schemaConfig = this.projectSettings.extraDataConfig.root;
           }
@@ -289,11 +285,11 @@ class StoryProvider {
       this.updateTranslateKeyAll(originData.data.content, terms);
       newNode = StoryletBranchNode.fromJson(originData);
     }
-    if (targetNode instanceof StoryletActionNode) {
-      newNode = StoryletActionNode.fromJson(originData);
+    if (targetNode instanceof StoryletCustomNode) {
+      newNode = StoryletCustomNode.fromJson(originData);
     }
-    if (targetNode instanceof StoryletInitNode) {
-      newNode = StoryletInitNode.fromJson(originData);
+    if (targetNode instanceof StoryletRootNode) {
+      newNode = StoryletRootNode.fromJson(originData);
     }
 
     if (!newNode) {
@@ -505,7 +501,7 @@ class StoryProvider {
     };
     this.projectSettings.i18n.forEach((lang) => {
       newTranslations[key][lang] =
-        val[lang] || newTranslations[key]?.[lang] || '';
+        val?.[lang] || newTranslations[key]?.[lang] || '';
     });
     this.updateTranslations(newTranslations);
   }

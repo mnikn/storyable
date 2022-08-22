@@ -8,13 +8,13 @@ import { generateUUID } from 'renderer/utils/uuid';
 import StoryProvider from 'renderer/services/story_provider';
 import eventBus, { Event } from '../../event';
 import ExtraDataConfigPanel from '../edit_dialog/extra_data_config';
-import ActionNodeConfigPanel from './action_node_config';
+import CustomNodeConfigPanel from './custom_node_config';
 
 enum Tab {
   I18n = 'I18n',
   ActorSettings = 'Actor settings',
   ExtraDataConfig = 'Extra data config',
-  ActionNodeSettings = 'Action node settings',
+  CustomNodeSettings = 'Custom node settings',
 }
 
 function ProjectSettingsDialog() {
@@ -433,8 +433,8 @@ function ProjectSettingsDialog() {
             }}
           />
         )}
-        {currentTab === Tab.ActionNodeSettings && (
-          <ActionNodeConfigPanel
+        {currentTab === Tab.CustomNodeSettings && (
+          <CustomNodeConfigPanel
             close={() => {
               setOpen(false);
               eventBus.emit(Event.CLOSE_DIALOG);

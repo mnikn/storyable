@@ -1,8 +1,8 @@
 import { CgAddR, CgPen, CgRemoveR } from 'react-icons/cg';
 import {
-  StoryletActionNode,
+  StoryletCustomNode,
   StoryletBranchNode,
-  StoryletInitNode,
+  StoryletRootNode,
   StoryletNode,
   StoryletSentenceNode,
 } from 'renderer/models/storylet';
@@ -53,7 +53,7 @@ function NodeActionMenu({
         <CgAddR className="font-bold text-xl mr-1" /> A
       </button>
 
-      {!(sourceNode instanceof StoryletInitNode) && (
+      {!(sourceNode instanceof StoryletRootNode) && (
         <>
           <div className="ml-2 mr-2 bg-gray-500 h-4/5 w-0.5" />
           <button
@@ -78,10 +78,10 @@ function NodeActionMenu({
             eventBus.emit(Event.SHOW_SENTENCE_EDIT_DIALOG, sourceNode);
           } else if (sourceNode instanceof StoryletBranchNode) {
             eventBus.emit(Event.SHOW_BRANCH_EDIT_DIALOG, sourceNode);
-          } else if (sourceNode instanceof StoryletInitNode) {
+          } else if (sourceNode instanceof StoryletRootNode) {
             eventBus.emit(Event.SHOW_ROOT_EDIT_DIALOG, sourceNode);
-          } else if (sourceNode instanceof StoryletActionNode) {
-            eventBus.emit(Event.SHOW_ACTION_EDIT_DIALOG, sourceNode);
+          } else if (sourceNode instanceof StoryletCustomNode) {
+            eventBus.emit(Event.SHOW_CUSTOM_EDIT_DIALOG, sourceNode);
           }
         }}
       >

@@ -1,8 +1,8 @@
 import { useContext, useEffect } from 'react';
 import {
-  StoryletActionNode,
+  StoryletCustomNode,
   StoryletBranchNode,
-  StoryletInitNode,
+  StoryletRootNode,
   StoryletSentenceNode,
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
@@ -71,10 +71,10 @@ function useShortcut({
           eventBus.emit(Event.SHOW_SENTENCE_EDIT_DIALOG, currentSelectingNode);
         } else if (currentSelectingNode instanceof StoryletBranchNode) {
           eventBus.emit(Event.SHOW_BRANCH_EDIT_DIALOG, currentSelectingNode);
-        } else if (currentSelectingNode instanceof StoryletInitNode) {
+        } else if (currentSelectingNode instanceof StoryletRootNode) {
           eventBus.emit(Event.SHOW_ROOT_EDIT_DIALOG, currentSelectingNode);
-        } else if (currentSelectingNode instanceof StoryletActionNode) {
-          eventBus.emit(Event.SHOW_ACTION_EDIT_DIALOG, currentSelectingNode);
+        } else if (currentSelectingNode instanceof StoryletCustomNode) {
+          eventBus.emit(Event.SHOW_CUSTOM_EDIT_DIALOG, currentSelectingNode);
         }
       }
 
@@ -93,14 +93,14 @@ function useShortcut({
 
       if (
         e.code === 'Backspace' &&
-        !(currentSelectingNode instanceof StoryletInitNode)
+        !(currentSelectingNode instanceof StoryletRootNode)
       ) {
         e.preventDefault();
         eventBus.emit(Event.DELETE_NODE, currentSelectingNode);
       }
       if (
         e.code === 'Space' &&
-        !(currentSelectingNode instanceof StoryletInitNode)
+        !(currentSelectingNode instanceof StoryletRootNode)
       ) {
         e.preventDefault();
         eventBus.emit(Event.QUICK_EDIT_START);

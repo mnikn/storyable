@@ -13,9 +13,9 @@ import { buildSchema } from 'renderer/models/schema/factory';
 import {
   NodeType,
   Storylet,
-  StoryletActionNode,
+  StoryletCustomNode,
   StoryletBranchNode,
-  StoryletInitNode,
+  StoryletRootNode,
   StoryletSentenceNode,
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
@@ -139,7 +139,7 @@ function NodeCard({
       if (selectingNode !== nodeId) {
         return;
       }
-      const newNode = new StoryletActionNode();
+      const newNode = new StoryletCustomNode();
       const currentNodeData = currentStorylet?.nodes[nodeId];
       if (!currentNodeData) {
         return;
@@ -191,10 +191,10 @@ function NodeCard({
   );
 
   const actionSummary = useMemo(() => {
-    if (!(nodeData instanceof StoryletActionNode)) {
+    if (!(nodeData instanceof StoryletCustomNode)) {
       return '';
     }
-    const schemaItem = StoryProvider.projectSettings.actionNodeConfig
+    const schemaItem = StoryProvider.projectSettings.customNodeConfig
       .map((item: any) => {
         return {
           type: item.type,
@@ -202,7 +202,7 @@ function NodeCard({
           schemaConfig: item.schema,
         };
       })
-      .find((item) => item.type === nodeData.data.actionType);
+      .find((item) => item.type === nodeData.data.customType);
     if (!schemaItem) {
       return '';
     }
@@ -227,7 +227,7 @@ function NodeCard({
 
   return (
     <>
-      {nodeData instanceof StoryletInitNode && (
+      {nodeData instanceof StoryletRootNode && (
         <div
           className={classNames(
             'absolute bg-amber-400 rounded-xl p-4 text-3xl flex items-center justify-center font-bold hover:bg-amber-200 cursor-pointer transition-all select-none',
@@ -410,7 +410,7 @@ function NodeCard({
           />
         </div>
       )}
-      {nodeData instanceof StoryletActionNode && (
+      {nodeData instanceof StoryletCustomNode && (
         <div
           className={classNames(
             'absolute bg-rose-400 rounded-xl p-12 hover:bg-rose-200 cursor-pointer transition-all select-none',
@@ -433,7 +433,7 @@ function NodeCard({
         >
           <div className="flex flex-col items-center">
             <div className="text-3xl font-bold mb-5">
-              {nodeData.data.actionType}
+              {nodeData.data.customType}
             </div>
             <div
               className="text-2xl"

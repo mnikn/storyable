@@ -51,6 +51,22 @@ ipcMain.on('saveFile', async (event, arg = {}) => {
   }
 });
 
+ipcMain.on('openFile', async (event, arg = {}) => {
+  if (!mainWindow) {
+    return;
+  }
+  let filePath = arg.path;
+  if (!filePath) {
+    filePath = dialog.showOpenDialogSync(mainWindow, {
+      filters: [{ name: 'Data', extensions: arg.extensions || [] }],
+    });
+  }
+  event.reply('openFile', {
+    res: { filePath },
+    arg
+  });
+});
+
 ipcMain.on('readFile', async (event, arg) => {
   if (fs.existsSync(arg.path)) {
     const content = fs.readFileSync(arg.path).toString();

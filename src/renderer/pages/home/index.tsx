@@ -7,7 +7,7 @@ import useView from './use_view';
 import Context from './context';
 import eventBus, { Event } from './event';
 import useShortcut from './use_shortcut';
-import { StoryletInitNode, StoryletNode } from 'renderer/models/storylet';
+import { StoryletRootNode, StoryletNode } from 'renderer/models/storylet';
 import SentenceEditDialog from './components/sentence_edit_dialog';
 import BranchEditDialog from './components/branch_edit_dialog';
 import TopMenu from './top_menu';
@@ -17,7 +17,7 @@ import { CgShapeHalfCircle } from 'react-icons/cg';
 import PreviewDialog from './components/preview_dialog';
 import MoveDialog from './move_dialog';
 import RootEditDialog from './components/root_edit_dialog';
-import ActionEditDialog from './components/action_edit_dialog';
+import CustomEditDialog from './components/custom_edit_dialog';
 
 function Home() {
   const [zoomDom, setZoomDom] = useState<HTMLDivElement | null>(null);
@@ -167,7 +167,7 @@ function Home() {
     eventBus.on(Event.SHOW_BRANCH_LINK_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_PREVIEW_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_SIDEBAR_RENAME_DIALOG, onDialogShow);
-    eventBus.on(Event.SHOW_ACTION_EDIT_DIALOG, onDialogShow);
+    eventBus.on(Event.SHOW_CUSTOM_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_ROOT_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.ON_SHOW_DIALOG, onDialogShow);
     eventBus.on(Event.CLOSE_DIALOG, onDialogClose);
@@ -186,7 +186,7 @@ function Home() {
       eventBus.off(Event.SHOW_BRANCH_LINK_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_PREVIEW_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_SIDEBAR_RENAME_DIALOG, onDialogShow);
-      eventBus.off(Event.SHOW_ACTION_EDIT_DIALOG, onDialogShow);
+      eventBus.off(Event.SHOW_CUSTOM_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_ROOT_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.ON_SHOW_DIALOG, onDialogShow);
       eventBus.off(Event.CLOSE_DIALOG, onDialogClose);
@@ -302,7 +302,7 @@ function Home() {
       <SentenceEditDialog />
       <BranchEditDialog />
       <BranchLinkEditDialog />
-      <ActionEditDialog />
+      <CustomEditDialog />
       <ProjectSettingsDialog />
       <RootEditDialog />
       <PreviewDialog />
