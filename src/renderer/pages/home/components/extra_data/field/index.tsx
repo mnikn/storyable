@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { CgArrowDown, CgArrowUp, CgMathPlus, CgRemove } from 'react-icons/cg';
 import {
   SchemaField,
+  SchemaFieldActorSelect,
   SchemaFieldArray,
+  SchemaFieldFile,
   SchemaFieldNumber,
   SchemaFieldObject,
   SchemaFieldSelect,
@@ -14,6 +16,8 @@ import {
 import StoryProvider from 'renderer/services/story_provider';
 import useEventState from 'renderer/utils/use_event_state';
 import { generateUUID } from 'renderer/utils/uuid';
+import FieldActorSelect from './actor_select_field';
+import FieldFile from './file_field';
 import FieldNumber from './number_field';
 import FieldSelect from './select_field';
 import FieldString from './string_field';
@@ -42,7 +46,7 @@ export function FieldContainer({
     return (
       <div
         className={classNames(
-          'grid gap-4 border border-gray-300 rounded-md p-2',
+          'grid gap-3 border border-gray-300 rounded-md p-2',
           className
         )}
         style={{
@@ -107,6 +111,65 @@ export function FieldContainer({
                   value={value[item.id]}
                   onValueChange={(v) => objectValueChange(v, item.id)}
                 />
+              </div>
+            );
+          }
+
+          if (item.data.type === SchemaFieldType.ActorSelect) {
+            return (
+              <div
+                style={{
+                  gridColumn: `span ${item.data.config.colSpan} / span ${item.data.config.colSpan}`,
+                }}
+                key={item.id}
+              >
+                <FieldActorSelect
+                  label={item.name || item.id}
+                  schema={item.data as SchemaFieldActorSelect}
+                  value={value[item.id]}
+                  onValueChange={(v) => objectValueChange(v, item.id)}
+                />
+              </div>
+            );
+          }
+
+          if (item.data.type === SchemaFieldType.File) {
+            return (
+              <div
+                style={{
+                  gridColumn: `span ${item.data.config.colSpan} / span ${item.data.config.colSpan}`,
+                }}
+                key={item.id}
+              >
+                <FieldFile
+                  label={item.name || item.id}
+                  schema={item.data as SchemaFieldFile}
+                  value={value[item.id]}
+                  onValueChange={(v) => objectValueChange(v, item.id)}
+                />
+              </div>
+            );
+          }
+
+          if (item.data.type === SchemaFieldType.Object) {
+            return (
+              <div
+                className="border border-gray-300 rounded-md p-2"
+                style={{
+                  gridColumn: `span ${item.data.config.colSpan} / span ${item.data.config.colSpan}`,
+                }}
+                key={item.id}
+              >
+                <div className="flex flex-col">
+                  <div className="font-bold mb-2 self-center text-sm">
+                    {item.name}
+                  </div>
+                  <FieldContainer
+                    schema={item.data || item.id}
+                    value={value[item.id]}
+                    onValueChange={(v) => objectValueChange(v, item.id)}
+                  />
+                </div>
               </div>
             );
           }
@@ -183,6 +246,44 @@ export function FieldContainer({
         />
       </div>
     );
+  } else if (schema.type === SchemaFieldType.ActorSelect) {
+    return (
+      <div
+        className={className}
+        style={{
+          gridColumn: `span ${schema.config.colSpan} / span ${schema.config.colSpan}`,
+        }}
+      >
+        <FieldActorSelect
+          schema={schema as SchemaFieldActorSelect}
+          value={value}
+          onValueChange={(v) => {
+            if (onValueChange) {
+              onValueChange(v);
+            }
+          }}
+        />
+      </div>
+    );
+  } else if (schema.type === SchemaFieldType.File) {
+    return (
+      <div
+        className={className}
+        style={{
+          gridColumn: `span ${schema.config.colSpan} / span ${schema.config.colSpan}`,
+        }}
+      >
+        <FieldFile
+          schema={schema as SchemaFieldFile}
+          value={value}
+          onValueChange={(v) => {
+            if (onValueChange) {
+              onValueChange(v);
+            }
+          }}
+        />
+      </div>
+    );
   }
   return null;
 }
@@ -198,16 +299,6 @@ export function FieldArray({
   value: any[];
   onValueChange?: (value: any) => void;
 }) {
-  const currentLang = useEventState<any>({
-    property: 'currentLang',
-    event: StoryProvider.event,
-    initialVal: StoryProvider.currentLang,
-  });
-  const translations = useEventState<any>({
-    property: 'translations',
-    event: StoryProvider.event,
-    initialVal: StoryProvider.translations,
-  });
   const [list, setList] = useState<any[]>(
     value.map((item) => {
       return {
@@ -291,39 +382,6 @@ export function FieldArray({
           }}
         >
           {list.map((item, i) => {
-            const summary = schema.config.summary.replace(
-              /\{\{[A-Za-z0-9_.\[\]]+\}\}/g,
-              (all) => {
-                const word = all.substring(2, all.length - 2);
-                if (word === '___key') {
-                  return item.name;
-                }
-                if (word === '___index') {
-                  return i + 1;
-                }
-                if (word.includes('___val')) {
-                  if (schema.fieldSchema.type !== 'object') {
-                    return schema.fieldSchema.type === 'string' &&
-                      schema.fieldSchema.config.needI18n
-                      ? translations[item.value]?.[currentLang]
-                      : item.value;
-                  } else {
-                    const wpath = word.split('.').splice(1).join('.');
-                    const v = get(item.value, wpath);
-
-                    const field = schema.fieldSchema.fields.find(
-                      (f) => f.id === wpath
-                    );
-
-                    return field?.data?.type === 'string' &&
-                      field?.data?.config?.needI18n
-                      ? v[currentLang]
-                      : v;
-                  }
-                }
-                return item.value;
-              }
-            );
             return (
               <div key={item.id} className="flex w-full items-center">
                 <div className="flex flex-grow w-full mb-2 items-center">
@@ -334,15 +392,15 @@ export function FieldArray({
                     onValueChange={(v) => onItemChange(v, i)}
                   />
                   <CgArrowUp
-                    className="cursor-pointer ml-2 mr-2 text-gray-800 hover:text-gray-500 transition-all"
+                    className="cursor-pointer ml-2 mr-2 text-gray-800 hover:text-gray-500 transition-all flex-shrink-0"
                     onClick={() => moveUpItem(i)}
                   />
                   <CgArrowDown
-                    className="cursor-pointer mr-2 text-gray-800 hover:text-gray-500 transition-all"
+                    className="cursor-pointer mr-2 text-gray-800 hover:text-gray-500 transition-all flex-shrink-0"
                     onClick={() => moveDownItem(i)}
                   />
                   <CgRemove
-                    className="cursor-pointer mr-2 text-gray-800 hover:text-gray-500 transition-all"
+                    className="cursor-pointer mr-2 text-gray-800 hover:text-gray-500 transition-all flex-shrink-0"
                     onClick={() => deleteItem(i)}
                   />
                 </div>

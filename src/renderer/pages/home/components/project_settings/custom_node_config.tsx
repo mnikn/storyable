@@ -25,6 +25,16 @@ const SELECT_JSON = {
   type: 'select',
   config: DEFAULT_CONFIG.SELECT_CONFIG_DEFAULT,
 };
+const ACTOR_SELECT_JSON = {
+  type: 'actor_select',
+  fields: {},
+  config: DEFAULT_CONFIG.ACTOR_SELECT_DEFAULT,
+};
+const FILE_JSON = {
+  type: 'file',
+  fields: {},
+  config: DEFAULT_CONFIG.FILE_DEFAULT,
+};
 const ARR_JSON = {
   type: 'array',
   fieldSchema: null,
@@ -41,7 +51,11 @@ function CustomNodeConfigPanel({ close }: { close: () => void }) {
   const [config, setConfig] = useState<string>('');
 
   useEffect(() => {
-    const str = JSON.stringify(projectSettings?.customNodeConfig || [], null, 4);
+    const str = JSON.stringify(
+      projectSettings?.customNodeConfig || [],
+      null,
+      4
+    );
     setConfig(str);
   }, [projectSettings]);
 
@@ -115,6 +129,24 @@ function CustomNodeConfigPanel({ close }: { close: () => void }) {
           range: range,
         },
         {
+          label: 'actorSelect',
+          kind: monaco.languages.CompletionItemKind.Snippet,
+          documentation: 'object field',
+          insertText: JSON.stringify(ACTOR_SELECT_JSON, null, 2),
+          insertTextRules:
+            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          range: range,
+        },
+        {
+          label: 'file',
+          kind: monaco.languages.CompletionItemKind.Snippet,
+          documentation: 'object field',
+          insertText: JSON.stringify(FILE_JSON, null, 2),
+          insertTextRules:
+            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          range: range,
+        },
+        {
           label: 'numberField',
           kind: monaco.languages.CompletionItemKind.Snippet,
           documentation: 'object field',
@@ -157,6 +189,30 @@ function CustomNodeConfigPanel({ close }: { close: () => void }) {
           insertText: formatInnerField({
             ...fieldObj,
             your_field: { ...fieldObj.your_field, ...SELECT_JSON },
+          }),
+          insertTextRules:
+            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          range: range,
+        },
+        {
+          label: 'actorSelectField', // 用户键入list2d_basic的任意前缀即可触发自动补全，选择该项即可触发添加代码片段
+          kind: monaco.languages.CompletionItemKind.Snippet,
+          documentation: 'actor select field',
+          insertText: formatInnerField({
+            ...fieldObj,
+            your_field: { ...fieldObj.your_field, ...ACTOR_SELECT_JSON },
+          }),
+          insertTextRules:
+            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          range: range,
+        },
+        {
+          label: 'fileField', // 用户键入list2d_basic的任意前缀即可触发自动补全，选择该项即可触发添加代码片段
+          kind: monaco.languages.CompletionItemKind.Snippet,
+          documentation: 'file field',
+          insertText: formatInnerField({
+            ...fieldObj,
+            your_field: { ...fieldObj.your_field, ...FILE_JSON },
           }),
           insertTextRules:
             monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,

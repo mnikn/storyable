@@ -175,6 +175,22 @@ export function validateValue(
     }
   }
 
+  if (schema.type === SchemaFieldType.ActorSelect) {
+    if (value !== null && value !== undefined) {
+      return value;
+    } else {
+      return schema.config.defaultValue;
+    }
+  }
+
+  if (schema.type === SchemaFieldType.File) {
+    if (value !== null && value !== undefined) {
+      return value;
+    } else {
+      return schema.config.defaultValue;
+    }
+  }
+
   return value;
 }
 
@@ -186,6 +202,7 @@ export enum SchemaFieldType {
   Boolean = 'boolean',
   Select = 'select',
   File = 'file',
+  ActorSelect = 'actor_select',
 }
 
 export const DEFAULT_CONFIG = {
@@ -275,6 +292,14 @@ export const DEFAULT_CONFIG = {
       },
     ],
   },
+  ACTOR_SELECT: {
+    enableWhen: null,
+    colSpan: 12,
+    defaultValue: {
+      id: null,
+      portrait: null,
+    },
+  },
   SELECT_CONFIG_DEFAULT: {
     colSpan: 4,
     options: [
@@ -284,6 +309,24 @@ export const DEFAULT_CONFIG = {
       },
     ],
     defaultValue: '',
+  },
+  ACTOR_SELECT_DEFAULT: {
+    colSpan: 4,
+    defaultValue: {
+      id: null,
+      portrait: null,
+    },
+  },
+  FILE: {
+    enableWhen: null,
+    colSpan: 4,
+    defaultValue: null,
+    type: 'img'
+  },
+  FILE_DEFAULT: {
+    colSpan: 6,
+    defaultValue: '',
+    type: 'img'
   },
 };
 
@@ -345,7 +388,7 @@ export class SchemaFieldObject extends SchemaField {
       }
       case SchemaFieldType.String: {
         return field.config.needI18n
-          ? generateUUID()
+          ? 'extra_field_' + generateUUID()
           : field.config.defaultValue;
       }
       case SchemaFieldType.Number: {
@@ -355,6 +398,9 @@ export class SchemaFieldObject extends SchemaField {
         return field.config.defaultValue;
       }
       case SchemaFieldType.Select: {
+        return field.config.defaultValue;
+      }
+      case SchemaFieldType.ActorSelect: {
         return field.config.defaultValue;
       }
     }
@@ -385,6 +431,8 @@ export class SchemaFieldBoolean extends SchemaField {
 }
 
 export class SchemaFieldFile extends SchemaField {
+  public config = DEFAULT_CONFIG.FILE;
+
   get type(): SchemaFieldType {
     return SchemaFieldType.File;
   }
@@ -395,5 +443,13 @@ export class SchemaFieldSelect extends SchemaField {
 
   get type(): SchemaFieldType {
     return SchemaFieldType.Select;
+  }
+}
+
+export class SchemaFieldActorSelect extends SchemaField {
+  public config = DEFAULT_CONFIG.ACTOR_SELECT;
+
+  get type(): SchemaFieldType {
+    return SchemaFieldType.ActorSelect;
   }
 }

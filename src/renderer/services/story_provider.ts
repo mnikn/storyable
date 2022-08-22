@@ -25,7 +25,7 @@ import {
 } from 'renderer/models/schema/schema';
 import { buildSchema } from 'renderer/models/schema/factory';
 import { iterObject } from 'renderer/utils/object';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get, set } from 'lodash';
 
 const OBJ_JSON = {
   type: 'object',
@@ -189,7 +189,7 @@ class StoryProvider {
         });
       });
 
-      console.log(this.story);
+      console.log(this.story, this.translations);
       this.event.emit('change:storyletGroups', [...this.storyletGroups]);
       this.event.emit('change:storylets', [...this.storylets]);
       this.event.emit('change:translations', { ...this.translations });
@@ -262,13 +262,13 @@ class StoryProvider {
     const originData = targetNode.toJson();
     let newNode: StoryletNode<any> | null = null;
     originData.id = 'node_' + generateUUID();
-    iterObject(originData.data.extraData, (k, d) => {
+    iterObject(originData.data.extraData, (_, d, path) => {
       if (typeof d === 'string' && this.translations[d]) {
         const extraTranslations =
-          this.translations[originData.data.extraData[k]];
-        originData.data.extraData[k] = 'extra_field_' + generateUUID();
+          this.translations[get(originData.data.extraData, path)];
+        set(originData.data.extraData, path, 'extra_field_' + generateUUID());
         this.updateTranslateKeyAll(
-          originData.data.extraData[k],
+          get(originData.data.extraData, path),
           extraTranslations
         );
       }
@@ -571,11 +571,11 @@ class StoryProvider {
   }
 
   private duplicateTranslations(data: any, keyPrefix = '') {
-    iterObject(data, (k, d) => {
+    iterObject(data, (_, d, path) => {
       if (typeof d === 'string' && this.translations[d]) {
-        const extraTranslations = this.translations[data[k]];
-        data[k] = keyPrefix + generateUUID();
-        this.updateTranslateKeyAll(data[k], extraTranslations);
+        const extraTranslations = this.translations[get(data, path)];
+        set(data, path, keyPrefix + generateUUID());
+        this.updateTranslateKeyAll(get(data, path), extraTranslations);
       }
     });
   }

@@ -1,7 +1,9 @@
 import {
   SchemaField,
+  SchemaFieldActorSelect,
   SchemaFieldArray,
   SchemaFieldBoolean,
+  SchemaFieldFile,
   SchemaFieldNumber,
   SchemaFieldObject,
   SchemaFieldSelect,
@@ -69,6 +71,16 @@ export function buildSchema(json: any, cacheSchemaMap: any = {}): SchemaField {
     }
     case SchemaFieldType.Select: {
       const instance = new SchemaFieldSelect();
+      instance.setup(json.config);
+      return instance;
+    }
+    case SchemaFieldType.ActorSelect: {
+      const instance = new SchemaFieldActorSelect();
+      instance.setup(json.config);
+      return instance;
+    }
+    case SchemaFieldType.File: {
+      const instance = new SchemaFieldFile();
       instance.setup(json.config);
       return instance;
     }
