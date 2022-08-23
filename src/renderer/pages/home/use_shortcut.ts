@@ -58,9 +58,17 @@ function useShortcut({
         }
       }
 
-      // if (e.code === 'Enter') {
-      //   eventBus.emit(Event.QUICK_EDIT_SUBMIT);
-      // }
+      if (e.code === 'Enter') {
+        if (e.ctrlKey) {
+          if (e.shiftKey) {
+            eventBus.emit(Event.ADD_SIBLING_CUSTOM);
+          } else {
+            eventBus.emit(Event.ADD_SIBLING_BRANCH);
+          }
+        } else {
+          eventBus.emit(Event.ADD_SIBLING_SENTENCE);
+        }
+      }
 
       if (e.code === 'Escape') {
         eventBus.emit(Event.DESELECT_NODE);
@@ -78,16 +86,11 @@ function useShortcut({
         }
       }
 
-      if (e.code === 'KeyD') {
-        eventBus.emit(
-          Event.DUPLICATE_NODE,
-          currentSelectingNode,
-          e.altKey
-            ? StoryProvider.currentStorylet?.getNodeSingleParent(
-                currentSelectingNode.id
-              )?.id || ''
-            : currentSelectingNode.id
-        );
+      if (e.code === 'KeyD' && e.ctrlKey) {
+        const event = e.altKey
+          ? Event.DUPLICATE_SIBLING_NODE
+          : Event.DUPLICATE_NODE;
+        eventBus.emit(event);
         return;
       }
 

@@ -80,7 +80,7 @@ function FieldNumber({
 
   return (
     <div className="w-full flex flex-col items-center">
-      {label && <div className="text-sm font-bold mb-2">{label}</div>}
+      {label && <div className="text-sm font-bold mb-3">{label}</div>}
       <input
         className="text-sm font-normal w-full outline-none border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
         value={valueText}

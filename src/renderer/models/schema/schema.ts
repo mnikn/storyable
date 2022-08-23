@@ -272,11 +272,11 @@ export const DEFAULT_CONFIG = {
   },
   BOOLEAN: {
     enableWhen: null,
-    colSpan: 1,
+    colSpan: 2,
     defaultValue: false,
   },
   BOOLEAN_CONFIG_DEFAULT: {
-    colSpan: 1,
+    colSpan: 2,
     defaultValue: false,
   },
   SELECT: {
@@ -324,7 +324,7 @@ export const DEFAULT_CONFIG = {
     type: 'img'
   },
   FILE_DEFAULT: {
-    colSpan: 6,
+    colSpan: 4,
     defaultValue: '',
     type: 'img'
   },

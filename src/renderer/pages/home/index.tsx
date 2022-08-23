@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import StoryProvider from 'renderer/services/story_provider';
 import Link from './components/link';
 import NodeCard from './components/node_card';
@@ -7,7 +13,13 @@ import useView from './use_view';
 import Context from './context';
 import eventBus, { Event } from './event';
 import useShortcut from './use_shortcut';
-import { StoryletRootNode, StoryletNode } from 'renderer/models/storylet';
+import {
+  StoryletRootNode,
+  StoryletNode,
+  StoryletCustomNode,
+  StoryletSentenceNode,
+  StoryletBranchNode,
+} from 'renderer/models/storylet';
 import SentenceEditDialog from './components/sentence_edit_dialog';
 import BranchEditDialog from './components/branch_edit_dialog';
 import TopMenu from './top_menu';
@@ -27,6 +39,9 @@ function Home() {
   const [isDialogShowing, setIsDialogShowing] = useState(false);
   const [dragingNode, setDragingNode] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [init, setInit] = useState(false);
+  const initRef = useRef(init);
+  initRef.current = init;
 
   const dragingNodeRef = useRef<any>(dragingNode);
   dragingNodeRef.current = dragingNode;
@@ -40,6 +55,17 @@ function Home() {
   useEffect(() => {
     setIsQuickEditing(false);
   }, [selectingNode]);
+
+  useLayoutEffect(() => {
+    if (initRef.current) {
+      return;
+    }
+    if (treeData.length > 0) {
+      console.log(treeData);
+      eventBus.emit(Event.SELECT_NODE, treeData[treeData.length-1].data.id);
+      setInit(true);
+    }
+  }, [treeData]);
 
   useShortcut({
     selectingNode,
@@ -55,6 +81,23 @@ function Home() {
         }
         return node;
       });
+      const dom = document.querySelector(`#${node}`);
+      if (dom) {
+        const rect = dom.getBoundingClientRect();
+        const pos = [0, 0];
+        if (visualViewport.width < rect.x + rect.width) {
+          pos[0] = -(rect.x - rect.width) * 0.8;
+        } else if (rect.x < rect.width) {
+          pos[0] = (rect.width + Math.abs(rect.x)) * 3.0;
+        }
+
+        if (visualViewport.height < rect.y + rect.height) {
+          pos[1] = -(rect.y - rect.height) * 0.8;
+        } else if (rect.y < rect.height) {
+          pos[1] = (rect.height + Math.abs(rect.y)) * 3.0;
+        }
+        eventBus.emit(Event.UPDATE_VIEW_POS, pos);
+      }
     };
 
     const onDeselect = () => {
@@ -81,22 +124,22 @@ function Home() {
       const parent = currentStorylet.getNodeSingleParent(
         currentSelectingNode.id
       );
-      StoryProvider.deleteStoryletNode(currentSelectingNode.id);
       if (parent) {
         const children = currentStorylet.getNodeChildren(parent.id);
-        const index = children.findIndex((node) => {
+        let index = children.findIndex((node) => {
           return node.id === currentSelectingNode.id;
         });
-        if (index !== -1 && children.length > index + 1) {
-          eventBus.emit(Event.SELECT_NODE, children[index + 1].id);
-        } else if (children.length < index) {
-          eventBus.emit(Event.SELECT_NODE, children[index - 1].id);
-        } else if (children.length > 0) {
-          eventBus.emit(Event.SELECT_NODE, children[0].id);
+        if (index !== -1 && children.length > 1) {
+          if (index === 0) {
+            eventBus.emit(Event.SELECT_NODE, children[1].id);
+          } else {
+            eventBus.emit(Event.SELECT_NODE, children[index - 1].id);
+          }
         } else {
           eventBus.emit(Event.SELECT_NODE, parent.id);
         }
       }
+      StoryProvider.deleteStoryletNode(currentSelectingNode.id);
     };
 
     const onDialogShow = () => {
@@ -149,8 +192,80 @@ function Home() {
       dragTargetRef.current = null;
     };
 
-    const duplicateNode = (node: StoryletNode<any>, parentId: string) => {
-      const newNode = StoryProvider.duplicateStoryletNode(node, parentId);
+    const addSiblingCustom = () => {
+      if (!selectingNode || !StoryProvider.currentStorylet) {
+        return;
+      }
+      const newNode = new StoryletCustomNode();
+      const parentNode = StoryProvider.currentStorylet.getNodeSingleParent(
+        StoryProvider.currentStorylet.nodes[selectingNode].id
+      );
+      if (!parentNode) {
+        return;
+      }
+      StoryProvider.addStoryletNode(newNode, parentNode);
+    };
+
+    const addSiblingSentence = () => {
+      if (!selectingNode || !StoryProvider.currentStorylet) {
+        return;
+      }
+      const newNode = new StoryletSentenceNode();
+      const parentNode = StoryProvider.currentStorylet.getNodeSingleParent(
+        StoryProvider.currentStorylet.nodes[selectingNode].id
+      );
+      if (!parentNode) {
+        return;
+      }
+      StoryProvider.addStoryletNode(newNode, parentNode);
+    };
+
+    const addSiblingBranch = () => {
+      if (!selectingNode || !StoryProvider.currentStorylet) {
+        return;
+      }
+      const newNode = new StoryletBranchNode();
+      const parentNode = StoryProvider.currentStorylet.getNodeSingleParent(
+        StoryProvider.currentStorylet.nodes[selectingNode].id
+      );
+      if (!parentNode) {
+        return;
+      }
+      StoryProvider.addStoryletNode(newNode, parentNode);
+    };
+
+    const duplicateNode = () => {
+      if (!selectingNode || !StoryProvider.currentStorylet) {
+        return;
+      }
+      const parentNode = StoryProvider.currentStorylet.nodes[selectingNode];
+      if (!parentNode) {
+        return;
+      }
+      const newNode = StoryProvider.duplicateStoryletNode(
+        StoryProvider.currentStorylet.nodes[selectingNode],
+        parentNode.id
+      );
+      if (newNode) {
+        setTimeout(() => {
+          eventBus.emit(Event.SELECT_NODE, newNode.id);
+        }, 0);
+      }
+    };
+    const duplicateSiblingNode = () => {
+      if (!selectingNode || !StoryProvider.currentStorylet) {
+        return;
+      }
+      const parentNode = StoryProvider.currentStorylet.getNodeSingleParent(
+        StoryProvider.currentStorylet.nodes[selectingNode].id
+      );
+      if (!parentNode) {
+        return;
+      }
+      const newNode = StoryProvider.duplicateStoryletNode(
+        StoryProvider.currentStorylet.nodes[selectingNode],
+        parentNode.id
+      );
       if (newNode) {
         eventBus.emit(Event.SELECT_NODE, newNode.id);
       }
@@ -174,6 +289,11 @@ function Home() {
     eventBus.on(Event.DRAG_NODE, onDragNode);
     eventBus.on(Event.END_DRAG_NODE, onDragEnd);
     eventBus.on(Event.DUPLICATE_NODE, duplicateNode);
+    eventBus.on(Event.DUPLICATE_SIBLING_NODE, duplicateSiblingNode);
+
+    eventBus.on(Event.ADD_SIBLING_SENTENCE, addSiblingSentence);
+    eventBus.on(Event.ADD_SIBLING_BRANCH, addSiblingBranch);
+    eventBus.on(Event.ADD_SIBLING_CUSTOM, addSiblingCustom);
     eventBus.on(Event.SAVE, onSave);
     return () => {
       eventBus.off(Event.SELECT_NODE, onSelectNode);
@@ -192,10 +312,14 @@ function Home() {
       eventBus.off(Event.CLOSE_DIALOG, onDialogClose);
       eventBus.off(Event.DRAG_NODE, onDragNode);
       eventBus.off(Event.END_DRAG_NODE, onDragEnd);
+      eventBus.off(Event.ADD_SIBLING_SENTENCE, addSiblingSentence);
+      eventBus.off(Event.ADD_SIBLING_BRANCH, addSiblingBranch);
+      eventBus.off(Event.ADD_SIBLING_CUSTOM, addSiblingCustom);
       eventBus.off(Event.DUPLICATE_NODE, duplicateNode);
+      eventBus.off(Event.DUPLICATE_SIBLING_NODE, duplicateSiblingNode);
       eventBus.off(Event.SAVE, onSave);
     };
-  }, [zoom]);
+  }, [zoom, selectingNode]);
 
   const onDomMounted = useCallback((dom: HTMLDivElement) => {
     if (dom) {

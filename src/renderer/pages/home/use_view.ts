@@ -4,6 +4,7 @@ import useEventState from 'renderer/utils/use_event_state';
 import { Storylet } from 'renderer/models/storylet';
 import StoryProvider from '../../services/story_provider';
 import eventBus, { Event } from './event';
+import { EVENT } from 'react-contexify/dist/constants';
 
 function findNodeById(json: any, id: string): any | null {
   if (!json) {
@@ -453,19 +454,52 @@ function useView({
     }
 
     const elm = document.querySelector('#main-content');
+    if (!elm) {
+      return;
+    }
+    let initialScale = 0.5;
+    let initialPos = [1500, 600];
+
+    const onZoom = function () {
+      let transformRes = d3.zoomTransform(elm);
+      // transformRes = transformRes.translate(initialPos[0], initialPos[1]);
+      // transformRes = transformRes.scale(initialScale);
+      setZoom(transformRes.k);
+      d3.select(zoomDom).style(
+        'transform',
+        `translate(${transformRes.x}px,${transformRes.y}px) scale(${transformRes.k})`
+      );
+    };
+
+    const updatePos = (pos) => {
+      if (!elm) {
+        return;
+      }
+      d3.zoom().translateBy(d3.select(elm), pos[0], pos[1]);
+      onZoom();
+      // let transformRes = d3.zoomTransform(elm);
+      // transformRes = transformRes.translate(initialPos[0], initialPos[1]);
+      // transformRes = transformRes.scale();
+      // d3.select(zoomDom).style(
+      //   'transform',
+      //   `translate(${transformRes.x}px,${transformRes.y}px) scale(${transformRes.k})`
+      // );
+    };
+
+    eventBus.on(Event.UPDATE_VIEW_POS, updatePos);
     d3.select(elm).call(
       /* eslint-disable func-names */
-      (d3 as any).zoom().on('zoom', function () {
-        const transfromRes = d3.zoomTransform(this);
-        setZoom(transfromRes.k);
-        d3.select(zoomDom).style(
-          'transform',
-          `translate(${transfromRes.x}px,${transfromRes.y}px) scale(${transfromRes.k})`
-        );
-      })
+      d3.zoom().on('zoom', onZoom)
     );
+    d3.zoom().translateTo(d3.select(elm), initialPos[0], initialPos[1]);
+    d3.zoom().scaleTo(d3.select(elm), initialScale);
+    onZoom();
 
     d3.select(elm).on('dblclick.zoom', null);
+
+    return () => {
+      eventBus.off(Event.UPDATE_VIEW_POS, updatePos);
+    };
   }, [zoomDom]);
 
   useEffect(() => {

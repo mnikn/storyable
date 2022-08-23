@@ -6,6 +6,7 @@ import {
   SchemaField,
   SchemaFieldActorSelect,
   SchemaFieldArray,
+  SchemaFieldBoolean,
   SchemaFieldFile,
   SchemaFieldNumber,
   SchemaFieldObject,
@@ -17,6 +18,7 @@ import StoryProvider from 'renderer/services/story_provider';
 import useEventState from 'renderer/utils/use_event_state';
 import { generateUUID } from 'renderer/utils/uuid';
 import FieldActorSelect from './actor_select_field';
+import FieldBoolean from './boolean_field';
 import FieldFile from './file_field';
 import FieldNumber from './number_field';
 import FieldSelect from './select_field';
@@ -151,6 +153,24 @@ export function FieldContainer({
             );
           }
 
+          if (item.data.type === SchemaFieldType.Boolean) {
+            return (
+              <div
+                style={{
+                  gridColumn: `span ${item.data.config.colSpan} / span ${item.data.config.colSpan}`,
+                }}
+                key={item.id}
+              >
+                <FieldBoolean
+                  label={item.name || item.id}
+                  schema={item.data as SchemaFieldBoolean}
+                  value={value[item.id]}
+                  onValueChange={(v) => objectValueChange(v, item.id)}
+                />
+              </div>
+            );
+          }
+
           if (item.data.type === SchemaFieldType.Object) {
             return (
               <div
@@ -275,6 +295,25 @@ export function FieldContainer({
       >
         <FieldFile
           schema={schema as SchemaFieldFile}
+          value={value}
+          onValueChange={(v) => {
+            if (onValueChange) {
+              onValueChange(v);
+            }
+          }}
+        />
+      </div>
+    );
+  } else if (schema.type === SchemaFieldType.Boolean) {
+    return (
+      <div
+        className={className}
+        style={{
+          gridColumn: `span ${schema.config.colSpan} / span ${schema.config.colSpan}`,
+        }}
+      >
+        <FieldBoolean
+          schema={schema as SchemaFieldBoolean}
           value={value}
           onValueChange={(v) => {
             if (onValueChange) {

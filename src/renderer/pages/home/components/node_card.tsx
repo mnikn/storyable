@@ -229,6 +229,7 @@ function NodeCard({
     <>
       {nodeData instanceof StoryletRootNode && (
         <div
+          id={nodeData.id}
           className={classNames(
             'absolute bg-amber-400 rounded-xl p-4 text-3xl flex items-center justify-center font-bold hover:bg-amber-200 cursor-pointer transition-all select-none',
             {
@@ -258,6 +259,7 @@ function NodeCard({
       )}
       {nodeData instanceof StoryletSentenceNode && (
         <div
+          id={nodeData.id}
           className={classNames(
             'absolute bg-green-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-green-200 cursor-pointer transition-all select-none',
             {
@@ -337,6 +339,7 @@ function NodeCard({
 
       {nodeData instanceof StoryletBranchNode && (
         <div
+          id={nodeData.id}
           className={classNames(
             'absolute bg-blue-400 rounded-xl p-12 text-3xl flex items-center justify-center font-bold hover:bg-blue-200 cursor-pointer transition-all select-none',
             {
@@ -412,6 +415,7 @@ function NodeCard({
       )}
       {nodeData instanceof StoryletCustomNode && (
         <div
+          id={nodeData.id}
           className={classNames(
             'absolute bg-rose-400 rounded-xl p-12 hover:bg-rose-200 cursor-pointer transition-all select-none',
             {

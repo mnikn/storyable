@@ -15,7 +15,7 @@ function FieldFile({
 }) {
   return (
     <div className="w-full flex flex-col items-center">
-      {label && <div className="text-sm font-bold mb-2">{label}</div>}
+      {label && <div className="text-sm font-bold mb-3">{label}</div>}
       {schema.config.type === 'img' && (
         <ImageUploading
           value={value}

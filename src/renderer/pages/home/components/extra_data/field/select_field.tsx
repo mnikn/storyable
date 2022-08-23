@@ -20,7 +20,7 @@ function FieldSelect({
 
   return (
     <div className="w-full flex flex-col items-center">
-      {label && <div className="text-sm font-bold mb-2">{label}</div>}
+      {label && <div className="text-sm font-bold mb-3">{label}</div>}
       <Select
         className="text-sm block outline-none cursor-pointer w-full"
         value={schema.config.options.find((d) => d.value === value)}

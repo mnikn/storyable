@@ -27,8 +27,14 @@ export enum Event {
   ADD_CHILD_SENTENCE = 'add_child_sentence',
   ADD_CHILD_BRANCH = 'add_child_branch',
   ADD_CHILD_ACTION = 'add_child_action',
+  ADD_SIBLING_SENTENCE = 'add_sibling_sentence',
+  ADD_SIBLING_BRANCH = 'add_sibling_branch',
+  ADD_SIBLING_CUSTOM = 'add_sibling_custom',
   DELETE_NODE = 'delete_node',
   DUPLICATE_NODE = 'duplicate_node',
+  DUPLICATE_SIBLING_NODE = 'duplicate_sibling_node',
+
+  UPDATE_VIEW_POS = 'update_view_pos',
   SAVE = 'save',
 }
 
