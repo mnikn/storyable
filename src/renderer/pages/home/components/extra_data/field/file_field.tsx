@@ -51,6 +51,10 @@ function FieldFile({
                     <img
                       className="m-auto"
                       src={value}
+                      style={{
+                        height: '72px',
+                        objectFit: 'cover',
+                      }}
                       alt=""
                       onClick={() => {
                         onImageUpdate(0);

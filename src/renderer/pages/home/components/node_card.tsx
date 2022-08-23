@@ -24,6 +24,23 @@ import Context from '../context';
 import eventBus, { Event } from '../event';
 import NodeActionMenu from './node_action_menu';
 
+const CELL_SIZE = {
+  big: [474, 256],
+  normal: [474, 128],
+  small: [224, 128],
+  tiny: [143, 128],
+};
+
+const DIALOGUE_PIC = {
+  talk_round:
+    'C:\\Users\\mnikn\\OneDrive\\games\\travler-story\\arts\\ui\\proto-ui1.png',
+  talk_bubble:
+    'C:\\Users\\mnikn\\OneDrive\\games\\travler-story\\arts\\ui\\proto-ui2.png',
+  option:
+    'C:\\Users\\mnikn\\OneDrive\\games\\travler-story\\arts\\ui\\proto-ui3.png',
+  info: 'C:\\Users\\mnikn\\OneDrive\\games\\travler-story\\arts\\ui\\proto-ui4.png',
+};
+
 function NodeCard({
   pos,
   nodeId,
@@ -336,7 +353,6 @@ function NodeCard({
           />
         </div>
       )}
-
       {nodeData instanceof StoryletBranchNode && (
         <div
           id={nodeData.id}
@@ -413,51 +429,200 @@ function NodeCard({
           />
         </div>
       )}
-      {nodeData instanceof StoryletCustomNode && (
-        <div
-          id={nodeData.id}
-          className={classNames(
-            'absolute bg-rose-400 rounded-xl p-12 hover:bg-rose-200 cursor-pointer transition-all select-none',
-            {
-              'bg-rose-200': isSelecting,
-            }
-          )}
-          style={{
-            transform: `translate(${pos.y}px,${pos.x}px)`,
-            height: '200px',
-            width: '400px',
-            zIndex: isSelecting ? '2' : '1',
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            eventBus.emit(Event.QUICK_EDIT_END);
-            eventBus.emit(Event.SELECT_NODE, nodeData.id);
-          }}
-          ref={dragListen}
-        >
-          <div className="flex flex-col items-center">
-            <div className="text-3xl font-bold mb-5">
-              {nodeData.data.customType}
+
+      {nodeData instanceof StoryletCustomNode &&
+        ['desc_cell', 'option_cell'].includes(nodeData.data.customType) && (
+          <div
+            id={nodeData.id}
+            className={classNames(
+              'absolute bg-rose-400 rounded-xl p-12 hover:bg-rose-200 cursor-pointer transition-all select-none',
+              {
+                'bg-rose-200': isSelecting,
+              }
+            )}
+            style={{
+              transform: `translate(${pos.y}px,${pos.x}px)`,
+              // width: CELL_SIZE[nodeData.data.extraData.size_type][0] + 'px',
+              height:
+                CELL_SIZE[nodeData.data.extraData.size_type][1] + 150 + 'px',
+              width: '474px',
+              // height: '406px',
+              zIndex: isSelecting ? '2' : '1',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              eventBus.emit(Event.QUICK_EDIT_END);
+              eventBus.emit(Event.SELECT_NODE, nodeData.id);
+            }}
+            ref={dragListen}
+          >
+            <div className="flex flex-col items-center h-full">
+              <div className="text-3xl font-bold mb-5">
+                {nodeData.data.customType}
+              </div>
+              <div
+                className="text-2xl"
+                style={{
+                  lineClamp: 3,
+                  display: '-webkit-box',
+                  overflow: 'hidden',
+                  boxOrient: 'vertical',
+                  wordBreak: 'break-all',
+                }}
+              ></div>
+              <div
+                className="relative m-auto "
+                style={{
+                  outline: '4px solid #000',
+                  borderRadius: '4px',
+                }}
+              >
+                <div className="relative overflow-hidden">
+                  <img
+                    className="bg-gray-800"
+                    style={{
+                      width:
+                        CELL_SIZE[nodeData.data.extraData.size_type][0] + 'px',
+                      height:
+                        CELL_SIZE[nodeData.data.extraData.size_type][1] + 'px',
+                      objectFit: 'cover',
+                      objectPosition: `${
+                        nodeData.data.extraData.bg.pos.x
+                      }px ${-nodeData.data.extraData.bg.pos.y}px`,
+                    }}
+                    src={nodeData.data.extraData.bg.pic}
+                    alt=""
+                  />
+                  {nodeData.data.extraData.actors.map((actorData) => {
+                    return (
+                      <img
+                        className="absolute"
+                        style={{
+                          width: '128px',
+                          height: '128px',
+                          top: actorData.pos.y + 'px',
+                          left: actorData.pos.x + 'px',
+                          transform: `scaleX(${
+                            actorData.flip_h ? -1 : 1
+                          }) scaleY(${actorData.flip_v ? -1 : 1})`,
+                          zoom: actorData.zoom,
+                        }}
+                        src={
+                          projectSettings.actors
+                            .find((item: any) => item.id === actorData.actor.id)
+                            ?.portraits.find(
+                              (p) => p.id === actorData.actor.portrait
+                            ).pic
+                        }
+                        alt=""
+                      />
+                    );
+                  })}
+                  {nodeData.data.extraData.decals.map((decal) => {
+                    return (
+                      <img
+                        className="absolute"
+                        src={decal.pic}
+                        style={{
+                          top: decal.pos.y + 'px',
+                          left: decal.pos.x + 'px',
+                          transform: `scaleX(${decal.flip_h ? -1 : 1}) scaleY(${
+                            decal.flip_v ? -1 : 1
+                          })`,
+                          zoom: decal.zoom,
+                        }}
+                        alt=""
+                      />
+                    );
+                  })}
+                </div>
+                {nodeData.data.extraData.dialogues.map((dialogue) => {
+                  return (
+                    <div
+                      className="absolute"
+                      style={{
+                        width: '200px',
+                        height: '120px',
+                        top: dialogue.pos.y + 'px',
+                        left: dialogue.pos.x + 'px',
+                        transform: `scaleX(${
+                          dialogue.flip_h ? -1 : 1
+                        }) scaleY(${dialogue.flip_v ? -1 : 1})`,
+                      }}
+                    >
+                      <img
+                        className="absolute"
+                        src={DIALOGUE_PIC[dialogue.type]}
+                        alt=""
+                      />
+                      <div
+                        className="absolute"
+                        style={{
+                          left: '50%',
+                          top: '50%',
+                          transform: 'translateX(-50%) translateY(-50%)',
+                          color: dialogue.text_color,
+                        }}
+                      >
+                        {translations[dialogue.content]?.[currentLang]}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div
-              className="text-2xl"
-              style={{
-                lineClamp: 3,
-                display: '-webkit-box',
-                overflow: 'hidden',
-                boxOrient: 'vertical',
-                wordBreak: 'break-all',
-              }}
-            >
-              {actionSummary}
-            </div>
+            <NodeActionMenu
+              visible={isSelecting && !dragingNode}
+              sourceNode={nodeData}
+            />
           </div>
-          <NodeActionMenu
-            visible={isSelecting && !dragingNode}
-            sourceNode={nodeData}
-          />
-        </div>
-      )}
+        )}
+      {nodeData instanceof StoryletCustomNode &&
+        !['desc_cell', 'option_cell'].includes(nodeData.data.customType) && (
+          <div
+            id={nodeData.id}
+            className={classNames(
+              'absolute bg-rose-400 rounded-xl p-12 hover:bg-rose-200 cursor-pointer transition-all select-none',
+              {
+                'bg-rose-200': isSelecting,
+              }
+            )}
+            style={{
+              transform: `translate(${pos.y}px,${pos.x}px)`,
+              height: '200px',
+              width: '400px',
+              zIndex: isSelecting ? '2' : '1',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              eventBus.emit(Event.QUICK_EDIT_END);
+              eventBus.emit(Event.SELECT_NODE, nodeData.id);
+            }}
+            ref={dragListen}
+          >
+            <div className="flex flex-col items-center">
+              <div className="text-3xl font-bold mb-5">
+                {nodeData.data.customType}
+              </div>
+              <div
+                className="text-2xl"
+                style={{
+                  lineClamp: 3,
+                  display: '-webkit-box',
+                  overflow: 'hidden',
+                  boxOrient: 'vertical',
+                  wordBreak: 'break-all',
+                }}
+              >
+                {actionSummary}
+              </div>
+            </div>
+            <NodeActionMenu
+              visible={isSelecting && !dragingNode}
+              sourceNode={nodeData}
+            />
+          </div>
+        )}
     </>
   );
 }
