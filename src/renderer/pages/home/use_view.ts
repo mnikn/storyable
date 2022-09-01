@@ -56,7 +56,7 @@ function useView({
     const root = d3.hierarchy(json) as d3.HierarchyRectangularNode<any>;
     root.x0 = 0;
     root.y0 = 0;
-    const tree = d3.tree().nodeSize([240, 700]);
+    const tree = d3.tree().nodeSize([400, 900]);
     tree(root);
 
     root.descendants().forEach((d: any) => {

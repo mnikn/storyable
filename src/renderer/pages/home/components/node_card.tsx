@@ -25,20 +25,19 @@ import eventBus, { Event } from '../event';
 import NodeActionMenu from './node_action_menu';
 
 const CELL_SIZE = {
-  big: [474, 256],
-  normal: [474, 128],
-  small: [224, 128],
-  tiny: [143, 128],
+  full: [692, 608],
+  "wf-h3": [692, 432],
+  "wf-h2": [692, 278],
+  "wf-h1": [692, 144],
+  "w/5-h1": [336, 144],
+  "w/3-h1": [224, 144],
 };
 
 const DIALOGUE_PIC = {
-  talk_round:
-    'C:\\Users\\mnikn\\OneDrive\\games\\travler-story\\arts\\ui\\proto-ui1.png',
-  talk_bubble:
-    'C:\\Users\\mnikn\\OneDrive\\games\\travler-story\\arts\\ui\\proto-ui2.png',
-  option:
-    'C:\\Users\\mnikn\\OneDrive\\games\\travler-story\\arts\\ui\\proto-ui3.png',
-  info: 'C:\\Users\\mnikn\\OneDrive\\games\\travler-story\\arts\\ui\\proto-ui4.png',
+  talk_normal:
+    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_normal.png',
+  talk_scream:
+    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_scream.png',
 };
 
 function NodeCard({
@@ -444,8 +443,8 @@ function NodeCard({
               transform: `translate(${pos.y}px,${pos.x}px)`,
               // width: CELL_SIZE[nodeData.data.extraData.size_type][0] + 'px',
               height:
-                CELL_SIZE[nodeData.data.extraData.size_type][1] + 150 + 'px',
-              width: '474px',
+                CELL_SIZE[nodeData.data.extraData.size_type]?.[1] + 150 + 'px',
+              width: '780px',
               // height: '406px',
               zIndex: isSelecting ? '2' : '1',
             }}
@@ -458,7 +457,7 @@ function NodeCard({
           >
             <div className="flex flex-col items-center h-full">
               <div className="text-3xl font-bold mb-5">
-                {nodeData.data.customType}
+                {nodeData.data.customType}({nodeData.data.extraData.size_type})
               </div>
               <div
                 className="text-2xl"
@@ -477,18 +476,26 @@ function NodeCard({
                   borderRadius: '4px',
                 }}
               >
-                <div className="relative overflow-hidden">
+                <div className="relative overflow-hidden" style={{
+                      width:
+                        CELL_SIZE[nodeData.data.extraData.size_type]?.[0] + 'px',
+                      height:
+                        CELL_SIZE[nodeData.data.extraData.size_type]?.[1] + 'px',
+                }}>
                   <img
                     className="bg-gray-800"
                     style={{
                       width:
-                        CELL_SIZE[nodeData.data.extraData.size_type][0] + 'px',
+                        CELL_SIZE[nodeData.data.extraData.size_type]?.[0] + 'px',
                       height:
-                        CELL_SIZE[nodeData.data.extraData.size_type][1] + 'px',
-                      objectFit: 'cover',
+                        CELL_SIZE[nodeData.data.extraData.size_type]?.[1] + 'px',
+                      objectFit: 'none',
                       objectPosition: `${
                         nodeData.data.extraData.bg.pos.x
                       }px ${-nodeData.data.extraData.bg.pos.y}px`,
+                      transform: `scaleX(${
+                        nodeData.data.extraData.bg.flip_h ? -nodeData.data.extraData.bg.scale : nodeData.data.extraData.bg.scale
+                      }) scaleY(${nodeData.data.extraData.bg.flip_v ? -nodeData.data.extraData.bg.scale : nodeData.data.extraData.bg.scale})`,
                     }}
                     src={nodeData.data.extraData.bg.pic}
                     alt=""
@@ -505,7 +512,7 @@ function NodeCard({
                           transform: `scaleX(${
                             actorData.flip_h ? -1 : 1
                           }) scaleY(${actorData.flip_v ? -1 : 1})`,
-                          zoom: actorData.zoom,
+                          zoom: actorData.scale,
                         }}
                         src={
                           projectSettings.actors
@@ -529,7 +536,7 @@ function NodeCard({
                           transform: `scaleX(${decal.flip_h ? -1 : 1}) scaleY(${
                             decal.flip_v ? -1 : 1
                           })`,
-                          zoom: decal.zoom,
+                          zoom: decal.scale,
                         }}
                         alt=""
                       />
@@ -541,19 +548,21 @@ function NodeCard({
                     <div
                       className="absolute"
                       style={{
-                        width: '200px',
-                        height: '120px',
+                        width: '208px',
+                        height: '128px',
                         top: dialogue.pos.y + 'px',
                         left: dialogue.pos.x + 'px',
-                        transform: `scaleX(${
-                          dialogue.flip_h ? -1 : 1
-                        }) scaleY(${dialogue.flip_v ? -1 : 1})`,
                       }}
                     >
                       <img
                         className="absolute"
                         src={DIALOGUE_PIC[dialogue.type]}
                         alt=""
+                        style={{
+                          transform: `scaleX(${
+                            dialogue.flip_h ? -1 : 1
+                          }) scaleY(${dialogue.flip_v ? -1 : 1})`,
+                        }}
                       />
                       <div
                         className="absolute"
