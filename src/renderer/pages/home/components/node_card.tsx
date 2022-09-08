@@ -26,11 +26,11 @@ import NodeActionMenu from './node_action_menu';
 
 const CELL_SIZE = {
   full: [692, 608],
-  "wf-h3": [692, 432],
-  "wf-h2": [692, 278],
-  "wf-h1": [692, 144],
-  "w/5-h1": [336, 144],
-  "w/3-h1": [224, 144],
+  'wf-h3': [692, 432],
+  'wf-h2': [692, 278],
+  'wf-h1': [692, 144],
+  'w/5-h1': [336, 144],
+  'w/3-h1': [224, 144],
 };
 
 const DIALOGUE_PIC = {
@@ -476,26 +476,36 @@ function NodeCard({
                   borderRadius: '4px',
                 }}
               >
-                <div className="relative overflow-hidden" style={{
-                      width:
-                        CELL_SIZE[nodeData.data.extraData.size_type]?.[0] + 'px',
-                      height:
-                        CELL_SIZE[nodeData.data.extraData.size_type]?.[1] + 'px',
-                }}>
+                <div
+                  className="relative overflow-hidden"
+                  style={{
+                    width:
+                      CELL_SIZE[nodeData.data.extraData.size_type]?.[0] + 'px',
+                    height:
+                      CELL_SIZE[nodeData.data.extraData.size_type]?.[1] + 'px',
+                  }}
+                >
                   <img
                     className="bg-gray-800"
                     style={{
                       width:
-                        CELL_SIZE[nodeData.data.extraData.size_type]?.[0] + 'px',
+                        CELL_SIZE[nodeData.data.extraData.size_type]?.[0] +
+                        'px',
                       height:
-                        CELL_SIZE[nodeData.data.extraData.size_type]?.[1] + 'px',
+                        CELL_SIZE[nodeData.data.extraData.size_type]?.[1] +
+                        'px',
                       objectFit: 'none',
-                      objectPosition: `${
-                        nodeData.data.extraData.bg.pos.x
-                      }px ${-nodeData.data.extraData.bg.pos.y}px`,
+                      objectPosition: `${-nodeData.data.extraData.bg.pos
+                        .x}px ${-nodeData.data.extraData.bg.pos.y}px`,
                       transform: `scaleX(${
-                        nodeData.data.extraData.bg.flip_h ? -nodeData.data.extraData.bg.scale : nodeData.data.extraData.bg.scale
-                      }) scaleY(${nodeData.data.extraData.bg.flip_v ? -nodeData.data.extraData.bg.scale : nodeData.data.extraData.bg.scale})`,
+                        nodeData.data.extraData.bg.flip_h
+                          ? -nodeData.data.extraData.bg.scale
+                          : nodeData.data.extraData.bg.scale
+                      }) scaleY(${
+                        nodeData.data.extraData.bg.flip_v
+                          ? -nodeData.data.extraData.bg.scale
+                          : nodeData.data.extraData.bg.scale
+                      })`,
                     }}
                     src={nodeData.data.extraData.bg.pic}
                     alt=""
@@ -544,6 +554,28 @@ function NodeCard({
                   })}
                 </div>
                 {nodeData.data.extraData.dialogues.map((dialogue) => {
+                  if (dialogue.type === 'text') {
+                    return (
+                      <>
+                        <div
+                          className="absolute"
+                          style={{
+                            transform: `scaleX(${
+                              dialogue.flip_h ? -1 : 1
+                            }) scaleY(${dialogue.flip_v ? -1 : 1}) rotate(${
+                              dialogue.rotation
+                            }deg)`,
+                            top: dialogue.pos.y + 'px',
+                            left: dialogue.pos.x + 'px',
+                            color: dialogue.text_color,
+                            fontSize: `${dialogue.text_size || 18}px`,
+                          }}
+                        >
+                          {translations[dialogue.content]?.[currentLang]}
+                        </div>
+                      </>
+                    );
+                  }
                   return (
                     <div
                       className="absolute"
@@ -552,29 +584,34 @@ function NodeCard({
                         height: '128px',
                         top: dialogue.pos.y + 'px',
                         left: dialogue.pos.x + 'px',
+                        transform: `scaleX(${dialogue.scale}) scaleY(${dialogue.scale})`,
                       }}
                     >
-                      <img
-                        className="absolute"
-                        src={DIALOGUE_PIC[dialogue.type]}
-                        alt=""
-                        style={{
-                          transform: `scaleX(${
-                            dialogue.flip_h ? -1 : 1
-                          }) scaleY(${dialogue.flip_v ? -1 : 1})`,
-                        }}
-                      />
-                      <div
-                        className="absolute"
-                        style={{
-                          left: '50%',
-                          top: '50%',
-                          transform: 'translateX(-50%) translateY(-50%)',
-                          color: dialogue.text_color,
-                        }}
-                      >
-                        {translations[dialogue.content]?.[currentLang]}
-                      </div>
+                      {dialogue.type !== 'text' && (
+                        <>
+                          <img
+                            className="absolute"
+                            src={DIALOGUE_PIC[dialogue.type]}
+                            alt=""
+                            style={{
+                              transform: `scaleX(${
+                                dialogue.flip_h ? -1 : 1
+                              }) scaleY(${dialogue.flip_v ? -1 : 1})`,
+                            }}
+                          />
+                          <div
+                            className="absolute"
+                            style={{
+                              left: '50%',
+                              top: '50%',
+                              transform: 'translateX(-50%) translateY(-50%)',
+                              color: dialogue.text_color,
+                            }}
+                          >
+                            {translations[dialogue.content]?.[currentLang]}
+                          </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}

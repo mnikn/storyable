@@ -62,7 +62,7 @@ function Home() {
     }
     if (treeData.length > 0) {
       console.log(treeData);
-      eventBus.emit(Event.SELECT_NODE, treeData[treeData.length-1].data.id);
+      eventBus.emit(Event.SELECT_NODE, treeData[treeData.length - 1].data.id);
       setInit(true);
     }
   }, [treeData]);
@@ -81,23 +81,23 @@ function Home() {
         }
         return node;
       });
-      const dom = document.querySelector(`#${node}`);
-      if (dom) {
-        const rect = dom.getBoundingClientRect();
-        const pos = [0, 0];
-        if (visualViewport.width < rect.x + rect.width) {
-          pos[0] = -(rect.x - rect.width) * 0.8;
-        } else if (rect.x < rect.width) {
-          pos[0] = (rect.width + Math.abs(rect.x)) * 3.0;
-        }
+      /* const dom = document.querySelector(`#${node}`);
+         * if (dom) {
+         *   const rect = dom.getBoundingClientRect();
+         *   const pos = [0, 0];
+         *   if (visualViewport.width < rect.x + rect.width) {
+         *     pos[0] = -(rect.x - rect.width) * 0.8;
+         *   } else if (rect.x < rect.width) {
+         *     pos[0] = (rect.width + Math.abs(rect.x)) * 3.0;
+         *   }
 
-        if (visualViewport.height < rect.y + rect.height) {
-          pos[1] = -(rect.y - rect.height) * 0.8;
-        } else if (rect.y < rect.height) {
-          pos[1] = (rect.height + Math.abs(rect.y)) * 3.0;
-        }
-        eventBus.emit(Event.UPDATE_VIEW_POS, pos);
-      }
+         *   if (visualViewport.height < rect.y + rect.height) {
+         *     pos[1] = -(rect.y - rect.height) * 0.8;
+         *   } else if (rect.y < rect.height) {
+         *     pos[1] = (rect.height + Math.abs(rect.y)) * 3.0;
+         *   }
+         *   eventBus.emit(Event.UPDATE_VIEW_POS, pos);
+         * } */
     };
 
     const onDeselect = () => {
