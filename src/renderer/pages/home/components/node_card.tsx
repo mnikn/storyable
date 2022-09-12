@@ -29,6 +29,7 @@ const CELL_SIZE = {
   'wf-h3': [692, 432],
   'wf-h2': [692, 278],
   'wf-h1': [692, 144],
+  'w/7-h1': [460, 144],
   'w/5-h1': [336, 144],
   'w/3-h1': [224, 144],
 };
@@ -38,6 +39,15 @@ const DIALOGUE_PIC = {
     'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_normal.png',
   talk_scream:
     'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_scream.png',
+  talk_shout:
+    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_shout.png',
+  talk_careful:
+    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_careful.png',
+  talk_scare:
+    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_scare.png',
+  think:
+    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-think.png',
+  info: 'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-info.png',
 };
 
 function NodeCard({
@@ -495,22 +505,22 @@ function NodeCard({
                         CELL_SIZE[nodeData.data.extraData.size_type]?.[1] +
                         'px',
                       objectFit: 'none',
-                      objectPosition: `${-nodeData.data.extraData.bg.pos
-                        .x}px ${-nodeData.data.extraData.bg.pos.y}px`,
+                      objectPosition: `${-nodeData.data.extraData?.bg?.pos
+                        .x}px ${-nodeData.data.extraData?.bg?.pos.y}px`,
                       transform: `scaleX(${
-                        nodeData.data.extraData.bg.flip_h
-                          ? -nodeData.data.extraData.bg.scale
-                          : nodeData.data.extraData.bg.scale
+                        nodeData.data.extraData?.bg?.flip_h
+                          ? -nodeData.data.extraData?.bg?.scale
+                          : nodeData.data.extraData?.bg?.scale
                       }) scaleY(${
-                        nodeData.data.extraData.bg.flip_v
-                          ? -nodeData.data.extraData.bg.scale
-                          : nodeData.data.extraData.bg.scale
+                        nodeData.data.extraData?.bg?.flip_v
+                          ? -nodeData.data.extraData?.bg?.scale
+                          : nodeData.data.extraData?.bg?.scale
                       })`,
                     }}
-                    src={nodeData.data.extraData.bg.pic}
+                    src={nodeData.data.extraData?.bg?.pic}
                     alt=""
                   />
-                  {nodeData.data.extraData.actors.map((actorData) => {
+                  {(nodeData.data.extraData?.actors || []).map((actorData) => {
                     return (
                       <img
                         className="absolute"
@@ -535,7 +545,7 @@ function NodeCard({
                       />
                     );
                   })}
-                  {nodeData.data.extraData.decals.map((decal) => {
+                  {(nodeData.data.extraData?.decals || []).map((decal) => {
                     return (
                       <img
                         className="absolute"
@@ -553,13 +563,15 @@ function NodeCard({
                     );
                   })}
                 </div>
-                {nodeData.data.extraData.dialogues.map((dialogue) => {
+                {(nodeData.data.extraData?.dialogues || []).map((dialogue) => {
                   if (dialogue.type === 'text') {
                     return (
                       <>
                         <div
                           className="absolute"
                           style={{
+                            width: dialogue.rotation === 0 ? '208px' : undefined,
+                            height: dialogue.rotation === 0 ? '128px' : undefined,
                             transform: `scaleX(${
                               dialogue.flip_h ? -1 : 1
                             }) scaleY(${dialogue.flip_v ? -1 : 1}) rotate(${
@@ -569,6 +581,8 @@ function NodeCard({
                             left: dialogue.pos.x + 'px',
                             color: dialogue.text_color,
                             fontSize: `${dialogue.text_size || 18}px`,
+                            display: 'flex',
+                            alignItems: 'center',
                           }}
                         >
                           {translations[dialogue.content]?.[currentLang]}
@@ -605,6 +619,7 @@ function NodeCard({
                               left: '50%',
                               top: '50%',
                               transform: 'translateX(-50%) translateY(-50%)',
+                              fontSize: `${dialogue.text_size || 18}px`,
                               color: dialogue.text_color,
                             }}
                           >
