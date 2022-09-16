@@ -14,11 +14,13 @@ import StoryProvider from 'renderer/services/story_provider';
 import useEventState from 'renderer/utils/use_event_state';
 import eventBus, { Event } from '../event';
 import ConditionPanel from './edit_dialog/condition_panel';
+import PicPart from './edit_dialog/pic_part';
 import ExtraDataPanel from './extra_data/extra_data_panel';
 
 enum Tab {
   BaseConfig = 'Base config',
   Data = 'Extra data',
+  Pic = 'Pic',
 }
 
 function CustomEditDialog() {
@@ -64,17 +66,26 @@ function CustomEditDialog() {
   if (!form || !sourceNode) {
     return null;
   }
+
   return (
     <Dialog
+      width={800}
       open={open}
       onClose={() => {
         setOpen(false);
       }}
       title="Edit custom node"
     >
-      <div className="w-full flex flex-col p-2" style={{ height: '650px' }}>
+      <div className="w-full flex flex-col p-2" style={{ height: '900px' }}>
         <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400 mb-5">
-          {Object.values(Tab).map((key) => {
+          {Object.values(
+            ['desc_cell', 'option_cell'].includes(sourceNode.data.customType)
+              ? Tab
+              : {
+                  BaseConfig: 'Base config',
+                  Data: 'Extra data',
+                }
+          ).map((key) => {
             return (
               <li
                 className="mr-2"
@@ -166,6 +177,18 @@ function CustomEditDialog() {
             customType={form.customType}
             onSubmit={() => {
               sourceNode.data.customType = form.customType;
+              StoryProvider.updateStoryletNode(sourceNode);
+            }}
+            close={() => {
+              setOpen(false);
+              eventBus.emit(Event.CLOSE_DIALOG);
+            }}
+          />
+        )}
+        {currentTab === Tab.Pic && (
+          <PicPart
+            sourceNode={sourceNode as StoryletNode<any>}
+            onSubmit={() => {
               StoryProvider.updateStoryletNode(sourceNode);
             }}
             close={() => {
