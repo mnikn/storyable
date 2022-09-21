@@ -5,12 +5,24 @@ import FieldFile from '../../extra_data/field/file_field';
 
 const picSchema = new SchemaFieldFile();
 
-function BgContent({ data }: { data: any }) {
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+function BgContent({
+  data,
+  onValueChange,
+}: {
+  data: any;
+  onValueChange: () => void;
+}) {
   return (
     <div className="flex">
-      <FieldFile schema={picSchema} value={data.pic} label={'pic'} />
+      <FieldFile
+        schema={picSchema}
+        value={data.pic}
+        label={'pic'}
+        onValueChange={(val) => {
+          data.pic = val;
+          onValueChange();
+        }}
+      />
     </div>
   );
 }

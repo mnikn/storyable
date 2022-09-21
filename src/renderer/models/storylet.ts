@@ -132,6 +132,7 @@ export class StoryletCustomNode extends StoryletNode<StoryletCustomNodeData> {
 
 export class Storylet extends Tree<StoryletNodeData> {
   public id: string = 'storylet_' + generateUUID();
+  public stotyletId: string = '';
   public name: string = '';
   public conditions: any[] = [];
 
@@ -163,6 +164,7 @@ export class Storylet extends Tree<StoryletNodeData> {
     const instance = new Storylet();
     instance.id = this.id;
     instance.name = this.name;
+    instance.stotyletId = this.stotyletId;
     instance.conditions = this.conditions;
     instance.nodes = { ...this.nodes };
     instance.links = { ...this.links };
@@ -173,6 +175,7 @@ export class Storylet extends Tree<StoryletNodeData> {
     const data = super.toJson();
     data.name = this.name;
     data.id = this.id;
+    data.stotyletId = this.stotyletId;
     data.conditions = this.conditions;
     return data;
   }
@@ -215,6 +218,8 @@ export class Storylet extends Tree<StoryletNodeData> {
 
     instance.id = json.id;
     instance.name = json.name;
+    instance.stotyletId = json.st
+    ;
     instance.conditions = json.conditions;
     return instance;
   }

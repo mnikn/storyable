@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { CELL_SIZE } from 'renderer/constatnts';
 import { buildSchema } from 'renderer/models/schema/factory';
 import {
   NodeType,
@@ -23,32 +24,7 @@ import useEventState from 'renderer/utils/use_event_state';
 import Context from '../context';
 import eventBus, { Event } from '../event';
 import NodeActionMenu from './node_action_menu';
-
-const CELL_SIZE = {
-  full: [692, 608],
-  'wf-h3': [692, 432],
-  'wf-h2': [692, 278],
-  'wf-h1': [692, 144],
-  'w/7-h1': [460, 144],
-  'w/5-h1': [336, 144],
-  'w/3-h1': [224, 144],
-};
-
-const DIALOGUE_PIC = {
-  talk_normal:
-    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_normal.png',
-  talk_scream:
-    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_scream.png',
-  talk_shout:
-    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_shout.png',
-  talk_careful:
-    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_careful.png',
-  talk_scare:
-    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-talk_scare.png',
-  think:
-    'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-think.png',
-  info: 'D:\\game_projects\\mnikn-tale-warrior-song\\src\\modules\\scene\\assets\\dialogues\\dialogue-info.png',
-};
+import SceneCellPart from './scene_cell_part';
 
 function NodeCard({
   pos,
@@ -251,6 +227,24 @@ function NodeCard({
 
   const isSelecting = selectingNode === nodeId;
 
+  /* const scale = 100 / nodeData.data.extraData.bg.crop_arena.width;
+   * const transform = {
+   *   x: `${-form.bg.crop_arena.x * scale}%`,
+   *   y: `${-form.bg.crop_arena.y * scale}%`,
+   *   scale,
+   *   width: 'calc(100% + 0.5px)',
+   *   height: 'auto',
+   * };
+
+   * const imageStyle = {
+   *   transform: `translate3d(${transform.x}, ${transform.y}, 0) scale3d(${transform.scale},${transform.scale},1)`,
+   *   width: transform.width,
+   *   height: transform.height,
+   *   top: 0,
+   *   left: 0,
+   *   transformOrigin: 'top left',
+   * };
+   */
   return (
     <>
       {nodeData instanceof StoryletRootNode && (
@@ -465,173 +459,7 @@ function NodeCard({
             }}
             ref={dragListen}
           >
-            <div className="flex flex-col items-center h-full">
-              <div className="text-3xl font-bold mb-5">
-                {nodeData.data.customType}({nodeData.data.extraData.size_type})
-              </div>
-              <div
-                className="text-2xl"
-                style={{
-                  lineClamp: 3,
-                  display: '-webkit-box',
-                  overflow: 'hidden',
-                  boxOrient: 'vertical',
-                  wordBreak: 'break-all',
-                }}
-              ></div>
-              <div
-                className="relative m-auto "
-                style={{
-                  outline: '4px solid #000',
-                  borderRadius: '4px',
-                }}
-              >
-                <div
-                  className="relative overflow-hidden"
-                  style={{
-                    width:
-                      CELL_SIZE[nodeData.data.extraData.size_type]?.[0] + 'px',
-                    height:
-                      CELL_SIZE[nodeData.data.extraData.size_type]?.[1] + 'px',
-                  }}
-                >
-                  <img
-                    className="bg-gray-800"
-                    style={{
-                      width:
-                        CELL_SIZE[nodeData.data.extraData.size_type]?.[0] +
-                        'px',
-                      height:
-                        CELL_SIZE[nodeData.data.extraData.size_type]?.[1] +
-                        'px',
-                      objectFit: 'none',
-                      objectPosition: `${-nodeData.data.extraData?.bg?.pos
-                        .x}px ${-nodeData.data.extraData?.bg?.pos.y}px`,
-                      transform: `scaleX(${
-                        nodeData.data.extraData?.bg?.flip_h
-                          ? -nodeData.data.extraData?.bg?.scale
-                          : nodeData.data.extraData?.bg?.scale
-                      }) scaleY(${
-                        nodeData.data.extraData?.bg?.flip_v
-                          ? -nodeData.data.extraData?.bg?.scale
-                          : nodeData.data.extraData?.bg?.scale
-                      })`,
-                    }}
-                    src={nodeData.data.extraData?.bg?.pic}
-                    alt=""
-                  />
-                  {(nodeData.data.extraData?.actors || []).map((actorData) => {
-                    return (
-                      <img
-                        className="absolute"
-                        style={{
-                          width: '128px',
-                          height: '128px',
-                          top: actorData.pos.y + 'px',
-                          left: actorData.pos.x + 'px',
-                          transform: `scaleX(${
-                            actorData.flip_h ? -1 : 1
-                          }) scaleY(${actorData.flip_v ? -1 : 1})`,
-                          zoom: actorData.scale,
-                        }}
-                        src={
-                          projectSettings.actors
-                            .find((item: any) => item.id === actorData.actor.id)
-                            ?.portraits.find(
-                              (p) => p.id === actorData.actor.portrait
-                            ).pic
-                        }
-                        alt=""
-                      />
-                    );
-                  })}
-                  {(nodeData.data.extraData?.decals || []).map((decal) => {
-                    return (
-                      <img
-                        className="absolute"
-                        src={decal.pic}
-                        style={{
-                          top: decal.pos.y + 'px',
-                          left: decal.pos.x + 'px',
-                          transform: `scaleX(${decal.flip_h ? -1 : 1}) scaleY(${
-                            decal.flip_v ? -1 : 1
-                          })`,
-                          zoom: decal.scale,
-                        }}
-                        alt=""
-                      />
-                    );
-                  })}
-                </div>
-                {(nodeData.data.extraData?.dialogues || []).map((dialogue) => {
-                  if (dialogue.type === 'text') {
-                    return (
-                      <>
-                        <div
-                          className="absolute"
-                          style={{
-                            width: dialogue.rotation === 0 ? '208px' : undefined,
-                            height: dialogue.rotation === 0 ? '128px' : undefined,
-                            transform: `scaleX(${
-                              dialogue.flip_h ? -1 : 1
-                            }) scaleY(${dialogue.flip_v ? -1 : 1}) rotate(${
-                              dialogue.rotation
-                            }deg)`,
-                            top: dialogue.pos.y + 'px',
-                            left: dialogue.pos.x + 'px',
-                            color: dialogue.text_color,
-                            fontSize: `${dialogue.text_size || 18}px`,
-                            display: 'flex',
-                            alignItems: 'center',
-                          }}
-                        >
-                          {translations[dialogue.content]?.[currentLang]}
-                        </div>
-                      </>
-                    );
-                  }
-                  return (
-                    <div
-                      className="absolute"
-                      style={{
-                        width: '208px',
-                        height: '128px',
-                        top: dialogue.pos.y + 'px',
-                        left: dialogue.pos.x + 'px',
-                        transform: `scaleX(${dialogue.scale}) scaleY(${dialogue.scale})`,
-                      }}
-                    >
-                      {dialogue.type !== 'text' && (
-                        <>
-                          <img
-                            className="absolute"
-                            src={DIALOGUE_PIC[dialogue.type]}
-                            alt=""
-                            style={{
-                              transform: `scaleX(${
-                                dialogue.flip_h ? -1 : 1
-                              }) scaleY(${dialogue.flip_v ? -1 : 1})`,
-                            }}
-                          />
-                          <div
-                            className="absolute"
-                            style={{
-                              left: '50%',
-                              top: '50%',
-                              transform: 'translateX(-50%) translateY(-50%)',
-                              fontSize: `${dialogue.text_size || 18}px`,
-                              color: dialogue.text_color,
-                            }}
-                          >
-                            {translations[dialogue.content]?.[currentLang]}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <SceneCellPart nodeData={nodeData} />
             <NodeActionMenu
               visible={isSelecting && !dragingNode}
               sourceNode={nodeData}
