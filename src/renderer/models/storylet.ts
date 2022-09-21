@@ -14,9 +14,9 @@ export interface StoryletNodeData {
   type: NodeType;
   extraData: any;
   enableConditions: Condition[];
+  customNodeId?: string;
 }
-export class StoryletNode<D extends StoryletNodeData> extends Node<D> {
-}
+export class StoryletNode<D extends StoryletNodeData> extends Node<D> {}
 
 // init node
 export interface StoryletRootNodeData extends StoryletNodeData {}
@@ -35,6 +35,7 @@ export class StoryletRootNode extends StoryletNode<StoryletRootNodeData> {
     instance.id = json.id;
     instance.data.enableConditions = json.data.enableConditions;
     instance.data.extraData = json.data.extraData || {};
+    instance.data.customNodeId = json.data.customNodeId;
     return instance;
   }
 }
@@ -66,6 +67,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
     instance.data.extraData = json.data.extraData || {};
     instance.data.actor = json.data.actor;
     instance.data.actorPortrait = json.data.actorPortrait;
+    instance.data.customNodeId = json.data.customNodeId;
     return instance;
   }
 }
@@ -97,6 +99,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
     instance.data.extraData = json.data.extraData || {};
     instance.data.actor = json.data.actor;
     instance.data.actorPortrait = json.data.actorPortrait;
+    instance.data.customNodeId = json.data.customNodeId;
     return instance;
   }
 }
@@ -122,6 +125,7 @@ export class StoryletCustomNode extends StoryletNode<StoryletCustomNodeData> {
     instance.data.customType = json.data.customType;
     instance.data.extraData = json.data.extraData;
     instance.data.enableConditions = json.data.enableConditions;
+    instance.data.customNodeId = json.data.customNodeId;
     return instance;
   }
 }

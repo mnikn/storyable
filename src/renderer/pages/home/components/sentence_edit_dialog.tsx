@@ -67,6 +67,28 @@ function SentenceEditDialog() {
         {form && (
           <div className="w-full flex flex-col p-2 h-86 overflow-auto">
             <div className="block mb-5">
+              <div className="text-md text-black mb-2 font-bold">
+                Custom node id
+              </div>
+              <input
+                className="resize-none text-md font-normal w-full h-8 outline-none border border-gray-300 rounded-md p-4 focus:ring-blue-500 focus:border-blue-500"
+                style={{ background: 'none' }}
+                value={form.customNodeId}
+                onChange={(e) => {
+                  setForm((prev) => {
+                    if (!prev) {
+                      return prev;
+                    }
+                    return {
+                      ...prev,
+                      customNodeId: e.target.value,
+                    };
+                  });
+                }}
+              />
+            </div>
+
+            <div className="block mb-5">
               <div className="text-md text-black mb-2 font-bold">Actor</div>
               <div className="flex items-center">
                 <select
