@@ -168,6 +168,7 @@ function CustomEditDialog() {
                   eventBus.emit(Event.CLOSE_DIALOG);
                   sourceNode.data.customType = form.customType;
                   sourceNode.data.enableConditions = form.enableConditions;
+                  sourceNode.data.customNodeId = form.customNodeId;
                   StoryProvider.updateStoryletNode(sourceNode);
                   setForm((prev) => {
                     if (!prev) {
