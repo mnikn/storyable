@@ -321,12 +321,12 @@ export const DEFAULT_CONFIG = {
     enableWhen: null,
     colSpan: 4,
     defaultValue: null,
-    type: 'img'
+    type: 'img',
   },
   FILE_DEFAULT: {
     colSpan: 4,
     defaultValue: '',
-    type: 'img'
+    type: 'img',
   },
 };
 
@@ -408,14 +408,14 @@ export class SchemaFieldObject extends SchemaField {
 }
 
 export class SchemaFieldNumber extends SchemaField {
-  public config = DEFAULT_CONFIG.NUMBER;
+  public config = { ...DEFAULT_CONFIG.NUMBER };
   get type(): SchemaFieldType {
     return SchemaFieldType.Number;
   }
 }
 
 export class SchemaFieldString extends SchemaField {
-  public config = DEFAULT_CONFIG.STRING;
+  public config = { ...DEFAULT_CONFIG.STRING };
 
   get type(): SchemaFieldType {
     return SchemaFieldType.String;
@@ -423,7 +423,7 @@ export class SchemaFieldString extends SchemaField {
 }
 
 export class SchemaFieldBoolean extends SchemaField {
-  public config = DEFAULT_CONFIG.BOOLEAN;
+  public config = { ...DEFAULT_CONFIG.BOOLEAN };
 
   get type(): SchemaFieldType {
     return SchemaFieldType.Boolean;
@@ -431,7 +431,7 @@ export class SchemaFieldBoolean extends SchemaField {
 }
 
 export class SchemaFieldFile extends SchemaField {
-  public config = DEFAULT_CONFIG.FILE;
+  public config = { ...DEFAULT_CONFIG.FILE };
 
   get type(): SchemaFieldType {
     return SchemaFieldType.File;
@@ -439,7 +439,7 @@ export class SchemaFieldFile extends SchemaField {
 }
 
 export class SchemaFieldSelect extends SchemaField {
-  public config = DEFAULT_CONFIG.SELECT;
+  public config = { ...DEFAULT_CONFIG.SELECT };
 
   get type(): SchemaFieldType {
     return SchemaFieldType.Select;
@@ -447,7 +447,7 @@ export class SchemaFieldSelect extends SchemaField {
 }
 
 export class SchemaFieldActorSelect extends SchemaField {
-  public config = DEFAULT_CONFIG.ACTOR_SELECT;
+  public config = { ...DEFAULT_CONFIG.ACTOR_SELECT };
 
   get type(): SchemaFieldType {
     return SchemaFieldType.ActorSelect;

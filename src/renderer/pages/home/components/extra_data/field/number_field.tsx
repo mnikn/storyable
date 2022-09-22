@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import { SchemaFieldNumber } from 'renderer/models/schema/schema';
 import useEventState from 'renderer/utils/use_event_state';
 import StoryProvider from 'renderer/services/story_provider';
+import classNames from 'classnames';
 
 function FieldNumber({
+  className,
   label,
   schema,
   value,
   onValueChange,
 }: {
+  className?: string;
   label?: string;
   schema: SchemaFieldNumber;
   value: any;
@@ -79,7 +82,7 @@ function FieldNumber({
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className={classNames('w-full flex flex-col items-center', className)}>
       {label && <div className="text-sm font-bold mb-3">{label}</div>}
       <input
         className="text-sm font-normal w-full outline-none border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 transition-all"

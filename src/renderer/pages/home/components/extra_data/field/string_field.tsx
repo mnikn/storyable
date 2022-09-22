@@ -4,6 +4,7 @@ import useEventState from 'renderer/utils/use_event_state';
 import StoryProvider from 'renderer/services/story_provider';
 import MonacoEditor from 'react-monaco-editor';
 import { get, uniq } from 'lodash';
+import classNames from 'classnames';
 
 const CodeFieldSchema = new SchemaFieldString();
 
@@ -83,11 +84,13 @@ const Editor = ({
 };
 
 function FieldString({
+  className,
   label,
   schema,
   value,
   onValueChange,
 }: {
+  className?: string;
   label?: string;
   schema: SchemaFieldString;
   value: any;
@@ -108,6 +111,7 @@ function FieldString({
     schema.config.needI18n ? translations[value]?.[currentLang] || '' : value
   );
 
+  console.log('reerv: ', schema.config);
   useEffect(() => {
     setContentValue(
       schema.config.needI18n ? translations[value]?.[currentLang] || '' : value
@@ -156,7 +160,7 @@ function FieldString({
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className={classNames('w-full flex flex-col items-center', className)}>
       {label && <div className="text-sm font-bold mb-3">{label}</div>}
       {schema.config.type === 'singleline' && (
         <input

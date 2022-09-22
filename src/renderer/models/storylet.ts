@@ -15,6 +15,8 @@ export interface StoryletNodeData {
   extraData: any;
   enableConditions: Condition[];
   customNodeId?: string;
+  enableCheck?: string;
+  processVar?: any;
 }
 export class StoryletNode<D extends StoryletNodeData> extends Node<D> {}
 
@@ -27,6 +29,7 @@ export class StoryletRootNode extends StoryletNode<StoryletRootNodeData> {
       type: NodeType.Root,
       enableConditions: [],
       extraData: {},
+      processVar: '',
     };
   }
 
@@ -36,6 +39,8 @@ export class StoryletRootNode extends StoryletNode<StoryletRootNodeData> {
     instance.data.enableConditions = json.data.enableConditions;
     instance.data.extraData = json.data.extraData || {};
     instance.data.customNodeId = json.data.customNodeId;
+    instance.data.processVar = json.data.processVar;
+    instance.data.enableCheck = json.data.enableCheck;
     return instance;
   }
 }
@@ -53,6 +58,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
       type: NodeType.Sentence,
       content: 'content_' + generateUUID(),
       enableConditions: [],
+      processVar: '',
       extraData: {},
       actor: null,
       actorPortrait: null,
@@ -68,6 +74,8 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
     instance.data.actor = json.data.actor;
     instance.data.actorPortrait = json.data.actorPortrait;
     instance.data.customNodeId = json.data.customNodeId;
+    instance.data.processVar = json.data.processVar;
+    instance.data.enableCheck = json.data.enableCheck;
     return instance;
   }
 }
@@ -84,6 +92,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
     this.data = {
       type: NodeType.Branch,
       content: 'content_' + generateUUID(),
+      processVar: '',
       enableConditions: [],
       extraData: {},
       actor: null,
@@ -100,6 +109,8 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
     instance.data.actor = json.data.actor;
     instance.data.actorPortrait = json.data.actorPortrait;
     instance.data.customNodeId = json.data.customNodeId;
+    instance.data.processVar = json.data.processVar;
+    instance.data.enableCheck = json.data.enableCheck;
     return instance;
   }
 }
@@ -113,6 +124,7 @@ export class StoryletCustomNode extends StoryletNode<StoryletCustomNodeData> {
     super();
     this.data = {
       type: NodeType.Custom,
+      processVar: '',
       customType: '',
       enableConditions: [],
       extraData: {},
@@ -126,6 +138,8 @@ export class StoryletCustomNode extends StoryletNode<StoryletCustomNodeData> {
     instance.data.extraData = json.data.extraData;
     instance.data.enableConditions = json.data.enableConditions;
     instance.data.customNodeId = json.data.customNodeId;
+    instance.data.processVar = json.data.processVar;
+    instance.data.enableCheck = json.data.enableCheck;
     return instance;
   }
 }
@@ -218,8 +232,7 @@ export class Storylet extends Tree<StoryletNodeData> {
 
     instance.id = json.id;
     instance.name = json.name;
-    instance.stotyletId = json.st
-    ;
+    instance.stotyletId = json.st;
     instance.conditions = json.conditions;
     return instance;
   }

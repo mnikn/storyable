@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
+import MonacoEditor from 'react-monaco-editor';
 import Dialog from 'renderer/components/dialog';
 import {
   StoryletRootNode,
@@ -41,7 +42,33 @@ function RootEditDialog() {
     content = (
       <>
         {form && (
-          <div className="w-full flex flex-col p-2 flex-grow">
+          <div className="w-full flex flex-col p-2 flex-grow overflow-auto">
+            <div className="text-md text-black mb-2 font-bold">Process var</div>
+            <MonacoEditor
+              className="block flex-shrink-0"
+              width="100%"
+              height="200"
+              theme="vs-dark"
+              value={form.processVar}
+              options={{
+                readOnly: false,
+                selectOnLineNumbers: true,
+              }}
+              onChange={(v) => {
+                form.processVar = v;
+                setForm((prev) => {
+                  return {
+                    ...prev,
+                  };
+                });
+              }}
+              editorDidMount={(editor) => {
+                setTimeout(() => {
+                  editor.layout();
+                  editor.focus();
+                }, 0);
+              }}
+            />
             <ConditionPanel
               conditions={form.enableConditions}
               onChange={(val) => {

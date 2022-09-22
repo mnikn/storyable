@@ -339,7 +339,7 @@ export function FieldArray({
   onValueChange?: (value: any) => void;
 }) {
   const [list, setList] = useState<any[]>(
-    value.map((item) => {
+    (value || []).map((item) => {
       return {
         id: generateUUID(),
         value: item,

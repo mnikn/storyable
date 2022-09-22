@@ -11,6 +11,7 @@ import eventBus, { Event } from '../event';
 import ConditionPanel from './edit_dialog/condition_panel';
 import ActorPart from './edit_dialog/actor_part';
 import ExtraDataPanel from './extra_data/extra_data_panel';
+import MonacoEditor from 'react-monaco-editor';
 
 enum Tab {
   BaseConfig = 'Base config',
@@ -98,18 +99,66 @@ function BranchEditDialog() {
               />
             </div>
 
-            <ConditionPanel
-              conditions={form.enableConditions}
-              onChange={(val) => {
-                form.enableConditions = val;
-                setForm((prev) => {
-                  if (!prev) {
-                    return prev;
-                  }
-                  return { ...prev };
-                });
-              }}
-            />
+            <div className="block flex items-center mb-5">
+              <div className="flex flex-col flex-grow">
+                <div className="text-md text-black mb-2 font-bold">
+                  Process var
+                </div>
+                <MonacoEditor
+                  className="block flex-shrink-0"
+                  width="100%"
+                  height="200"
+                  theme="vs-dark"
+                  value={form.processVar}
+                  options={{
+                    readOnly: false,
+                    selectOnLineNumbers: true,
+                  }}
+                  onChange={(v) => {
+                    form.processVar = v;
+                    setForm((prev) => {
+                      return {
+                        ...prev,
+                      };
+                    });
+                  }}
+                  editorDidMount={(editor) => {
+                    setTimeout(() => {
+                      editor.layout();
+                    }, 0);
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col flex-grow">
+              <div className="text-md text-black my-2 font-bold">
+                Enable check
+              </div>
+              <MonacoEditor
+                className="flex-shrink-0"
+                width="100%"
+                height="200"
+                theme="vs-dark"
+                value={form.enableCheck}
+                options={{
+                  readOnly: false,
+                  selectOnLineNumbers: true,
+                }}
+                onChange={(v) => {
+                  form.enableCheck = v;
+                  setForm((prev) => {
+                    return {
+                      ...prev,
+                    };
+                  });
+                }}
+                editorDidMount={(editor) => {
+                  setTimeout(() => {
+                    editor.layout();
+                  }, 0);
+                }}
+              />
+            </div>
           </div>
         )}
         <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">

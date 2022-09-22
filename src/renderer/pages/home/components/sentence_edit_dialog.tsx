@@ -12,11 +12,17 @@ import Select, { components } from 'react-select';
 import eventBus, { Event } from '../event';
 import ConditionPanel from './edit_dialog/condition_panel';
 import ExtraDataPanel from './extra_data/extra_data_panel';
+import { SchemaFieldString } from 'renderer/models/schema/schema';
+import FieldString from './extra_data/field/string_field';
+import MonacoEditor from 'react-monaco-editor';
 
 enum Tab {
   BaseConfig = 'Base config',
   ExtraData = 'Extra data',
 }
+
+const processVarsSchema = new SchemaFieldString();
+processVarsSchema.config = { ...processVarsSchema.config, type: 'multiline' };
 
 function SentenceEditDialog() {
   const [open, setOpen] = useState(false);
@@ -65,7 +71,7 @@ function SentenceEditDialog() {
     content = (
       <>
         {form && (
-          <div className="w-full flex flex-col p-2 h-86 overflow-auto">
+          <div className="w-full flex flex-col p-2 overflow-auto">
             <div className="block mb-5">
               <div className="text-md text-black mb-2 font-bold">
                 Custom node id
@@ -212,18 +218,66 @@ function SentenceEditDialog() {
               />
             </div>
 
-            <ConditionPanel
-              conditions={form.enableConditions}
-              onChange={(val) => {
-                form.enableConditions = val;
-                setForm((prev) => {
-                  if (!prev) {
-                    return prev;
-                  }
-                  return { ...prev };
-                });
-              }}
-            />
+            <div className="block flex items-center mb-5">
+              <div className="flex flex-col flex-grow">
+                <div className="text-md text-black mb-2 font-bold">
+                  Process var
+                </div>
+                <MonacoEditor
+                  className="block flex-shrink-0"
+                  width="100%"
+                  height="200"
+                  theme="vs-dark"
+                  value={form.processVar}
+                  options={{
+                    readOnly: false,
+                    selectOnLineNumbers: true,
+                  }}
+                  onChange={(v) => {
+                    form.processVar = v;
+                    setForm((prev) => {
+                      return {
+                        ...prev,
+                      };
+                    });
+                  }}
+                  editorDidMount={(editor) => {
+                    setTimeout(() => {
+                      editor.layout();
+                    }, 0);
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col flex-grow">
+              <div className="text-md text-black my-2 font-bold">
+                Enable check
+              </div>
+              <MonacoEditor
+                className="flex-shrink-0"
+                width="100%"
+                height="200"
+                theme="vs-dark"
+                value={form.enableCheck}
+                options={{
+                  readOnly: false,
+                  selectOnLineNumbers: true,
+                }}
+                onChange={(v) => {
+                  form.enableCheck = v;
+                  setForm((prev) => {
+                    return {
+                      ...prev,
+                    };
+                  });
+                }}
+                editorDidMount={(editor) => {
+                  setTimeout(() => {
+                    editor.layout();
+                  }, 0);
+                }}
+              />
+            </div>
           </div>
         )}
         <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
@@ -244,7 +298,6 @@ function SentenceEditDialog() {
                     StoryProvider.currentLang
                   ] = form.content;
                 }
-                console.log(form);
                 sourceNode.data = {
                   ...form,
                   content: sourceNode.data.content,

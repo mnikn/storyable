@@ -1,12 +1,15 @@
 import { SchemaFieldSelect } from 'renderer/models/schema/schema';
 import Select, { components } from 'react-select';
+import classNames from 'classnames';
 
 function FieldSelect({
+  className,
   label,
   schema,
   value,
   onValueChange,
 }: {
+  className?: string;
   label?: string;
   schema: SchemaFieldSelect;
   value: any;
@@ -19,7 +22,7 @@ function FieldSelect({
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className={classNames('w-full flex flex-col items-center', className)}>
       {label && <div className="text-sm font-bold mb-3">{label}</div>}
       <Select
         className="text-sm block outline-none cursor-pointer w-full"

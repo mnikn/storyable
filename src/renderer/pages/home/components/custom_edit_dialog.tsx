@@ -1,10 +1,14 @@
 import classNames from 'classnames';
 import { table } from 'console';
 import { useEffect, useMemo, useState } from 'react';
+import MonacoEditor from 'react-monaco-editor';
 import Select from 'react-select';
 import Dialog from 'renderer/components/dialog';
 import { buildSchema } from 'renderer/models/schema/factory';
-import { validateValue } from 'renderer/models/schema/schema';
+import {
+  SchemaFieldString,
+  validateValue,
+} from 'renderer/models/schema/schema';
 import {
   StoryletCustomNode,
   StoryletCustomNodeData,
@@ -16,6 +20,14 @@ import eventBus, { Event } from '../event';
 import ConditionPanel from './edit_dialog/condition_panel';
 import PicPart from './edit_dialog/pic_part';
 import ExtraDataPanel from './extra_data/extra_data_panel';
+import FieldString from './extra_data/field/string_field';
+
+const processVarsSchema = new SchemaFieldString();
+processVarsSchema.config = {
+  ...processVarsSchema.config,
+  type: 'multiline',
+  needI18n: false,
+};
 
 enum Tab {
   BaseConfig = 'Base config',
@@ -110,7 +122,7 @@ function CustomEditDialog() {
         </ul>
         {currentTab === Tab.BaseConfig && (
           <>
-            <div className="w-full flex flex-col mb-5">
+            <div className="w-full flex flex-col mb-5 overflow-auto px-2">
               <div className="block mb-5">
                 <div className="text-md text-black mb-2 font-bold">
                   Custom node id
@@ -146,16 +158,60 @@ function CustomEditDialog() {
                   options={options}
                 />
               </div>
-              <ConditionPanel
-                conditions={form.enableConditions}
-                onChange={(val) => {
-                  form.enableConditions = val;
+
+              <div className="text-md text-black mb-2 font-bold">
+                Process var
+              </div>
+              <MonacoEditor
+                className="flex-shrink-0"
+                width="100%"
+                height="200"
+                theme="vs-dark"
+                value={form.processVar}
+                options={{
+                  readOnly: false,
+                  selectOnLineNumbers: true,
+                }}
+                onChange={(v) => {
+                  form.processVar = v;
                   setForm((prev) => {
-                    if (!prev) {
-                      return prev;
-                    }
-                    return { ...prev };
+                    return {
+                      ...prev,
+                    };
                   });
+                }}
+                editorDidMount={(editor) => {
+                  setTimeout(() => {
+                    editor.layout();
+                  }, 0);
+                }}
+              />
+
+              <div className="text-md text-black my-2 font-bold">
+                Enable check
+              </div>
+              <MonacoEditor
+                className="flex-shrink-0"
+                width="100%"
+                height="200"
+                theme="vs-dark"
+                value={form.enableCheck}
+                options={{
+                  readOnly: false,
+                  selectOnLineNumbers: true,
+                }}
+                onChange={(v) => {
+                  form.enableCheck = v;
+                  setForm((prev) => {
+                    return {
+                      ...prev,
+                    };
+                  });
+                }}
+                editorDidMount={(editor) => {
+                  setTimeout(() => {
+                    editor.layout();
+                  }, 0);
                 }}
               />
             </div>
@@ -169,6 +225,8 @@ function CustomEditDialog() {
                   sourceNode.data.customType = form.customType;
                   sourceNode.data.enableConditions = form.enableConditions;
                   sourceNode.data.customNodeId = form.customNodeId;
+                  sourceNode.data.processVar = form.processVar;
+                  sourceNode.data.enableCheck = form.enableCheck;
                   StoryProvider.updateStoryletNode(sourceNode);
                   setForm((prev) => {
                     if (!prev) {

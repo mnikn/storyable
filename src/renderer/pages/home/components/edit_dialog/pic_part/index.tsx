@@ -7,6 +7,8 @@ import Cropper from 'react-easy-crop';
 import * as d3 from 'd3';
 import { DIALOGUE_PIC } from 'renderer/constatnts';
 import useEventState from 'renderer/utils/use_event_state';
+import ActorContent from './actor';
+import DialogueContent from './dialogue';
 
 const CELL_SIZE = {
   full: [692, 608],
@@ -159,6 +161,22 @@ function PicPart({
                   />
                 );
               })}
+            {currentTab !== Tab.Decal &&
+              form.decals.map((decal) => {
+                return (
+                  <img
+                    className="absolute"
+                    style={{
+                      bottom: decal.pos.y + 'px',
+                      left: decal.pos.x + 'px',
+                      transform: `scaleX(${
+                        decal.flip_h ? -decal.scale : decal.scale
+                      }) scaleY(${decal.flip_v ? -decal.scale : decal.scale})`,
+                    }}
+                    src={decal.pic}
+                  />
+                );
+              })}
             {currentTab !== Tab.Dialogue &&
               form.dialogues.map((dialogue) => {
                 return (
@@ -305,6 +323,43 @@ function PicPart({
                   />
                 );
               })}
+            {currentTab === Tab.Decal &&
+              form.decals.map((decal) => {
+                return (
+                  <img
+                    ref={(dom: any) => {
+                      if (!dom) {
+                        return;
+                      }
+                      dom.style.left = decal.pos.x + 'px';
+                      dom.style.bottom = decal.pos.y + 'px';
+                      const dragListener = d3.drag().on('drag', (val) => {
+                        decal.pos.x += val.dx / decal.scale;
+                        decal.pos.x = Math.max(-50, decal.pos.x);
+                        decal.pos.x = Math.min(cellSize[0] - 50, decal.pos.x);
+
+                        decal.pos.y -= val.dy / decal.scale;
+                        decal.pos.y = Math.max(-50, decal.pos.y);
+                        decal.pos.y = Math.min(cellSize[1] - 50, decal.pos.y);
+                        setForm((prev) => {
+                          return { ...prev };
+                        });
+                      });
+                      dragListener(d3.select(dom));
+                    }}
+                    className="absolute bottom-0 left-0 cursor-move"
+                    style={{
+                      outline: '5px solid black',
+                      bottom: decal.pos.y + 'px',
+                      left: decal.pos.x + 'px',
+                      transform: `scaleX(${
+                        decal.flip_h ? -decal.scale : decal.scale
+                      }) scaleY(${decal.flip_v ? -decal.scale : decal.scale})`,
+                    }}
+                    src={decal.pic}
+                  />
+                );
+              })}
           </div>
         </>
       )}
@@ -335,6 +390,26 @@ function PicPart({
       {currentTab === Tab.Bg && (
         <BgContent
           data={form.bg}
+          onValueChange={() => {
+            setForm((prev) => {
+              return { ...prev };
+            });
+          }}
+        />
+      )}
+      {currentTab === Tab.Actor && (
+        <ActorContent
+          data={form.actors}
+          onValueChange={() => {
+            setForm((prev) => {
+              return { ...prev };
+            });
+          }}
+        />
+      )}
+      {currentTab === Tab.Dialogue && (
+        <DialogueContent
+          data={form.dialogues}
           onValueChange={() => {
             setForm((prev) => {
               return { ...prev };

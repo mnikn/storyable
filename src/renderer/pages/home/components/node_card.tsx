@@ -208,17 +208,32 @@ function NodeCard({
     if (!schemaItem) {
       return '';
     }
-    return schemaItem.schema.config.summary.replace(
+    let content = schemaItem.schema.config.summary.replace(
       /\{\{[A-Za-z0-9_.\[\]]+\}\}/g,
       (all) => {
         const word = all.substring(2, all.length - 2);
+        if (word === '___key') {
+          return '';
+        }
         const v = get(nodeData.data.extraData, word, '');
         if (typeof v === 'string' && StoryProvider.translations[v]) {
+          console.log(
+            'vv: ',
+            v,
+            word,
+            StoryProvider.translations[v]?.[currentLang]
+          );
           return StoryProvider.translations[v]?.[currentLang];
         }
         return v;
       }
     );
+
+    if (nodeData.data.extraData.type === 'jump_to_node') {
+      content += `(${nodeData.data.extraData.target_node_id})`;
+    }
+
+    return content;
   }, [nodeData]);
 
   if (!nodeData) {
@@ -270,7 +285,7 @@ function NodeCard({
             eventBus.emit(Event.SELECT_NODE, nodeData.id);
           }}
         >
-          {currentStorylet.name}
+          {currentStorylet.name}({nodeData.data.extraData.storylet_id})
           <NodeActionMenu
             visible={isSelecting && !dragingNode}
             sourceNode={nodeData}
@@ -302,6 +317,18 @@ function NodeCard({
           }}
           ref={dragListen}
         >
+          {nodeData.data.customNodeId && (
+            <div
+              className="text-3xl font-bold mb-5 absolute"
+              style={{
+                top: 0,
+              }}
+            >
+              {nodeData.data.customNodeId
+                ? `(${nodeData.data.customNodeId})`
+                : ''}
+            </div>
+          )}
           {(!isQuickEditing || !isSelecting) && (
             <div className="flex cursor-pointer w-full h-full overflow-hidden">
               {nodeData.data.actor && (
@@ -378,6 +405,18 @@ function NodeCard({
           }}
           ref={dragListen}
         >
+          {nodeData.data.customNodeId && (
+            <div
+              className="text-3xl font-bold mb-5 absolute"
+              style={{
+                top: 0,
+              }}
+            >
+              {nodeData.data.customNodeId
+                ? `(${nodeData.data.customNodeId})`
+                : ''}
+            </div>
+          )}
           {(!isQuickEditing || !isSelecting) && (
             <div className="flex cursor-pointer w-full h-full overflow-hidden">
               {nodeData.data.actor && (
@@ -492,6 +531,9 @@ function NodeCard({
             <div className="flex flex-col items-center">
               <div className="text-3xl font-bold mb-5">
                 {nodeData.data.customType}
+                {nodeData.data.customNodeId
+                  ? `(${nodeData.data.customNodeId})`
+                  : ''}
               </div>
               <div
                 className="text-2xl"

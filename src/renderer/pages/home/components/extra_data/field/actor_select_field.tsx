@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { useMemo } from 'react';
 import Select, { components } from 'react-select';
 import { SchemaFieldActorSelect } from 'renderer/models/schema/schema';
@@ -5,11 +6,13 @@ import StoryProvider from 'renderer/services/story_provider';
 import useEventState from 'renderer/utils/use_event_state';
 
 function FieldActorSelect({
+  className,
   label,
   schema,
   value,
   onValueChange,
 }: {
+  className?: string;
   label?: string;
   schema: SchemaFieldActorSelect;
   value: any;
@@ -40,9 +43,8 @@ function FieldActorSelect({
     });
   }, [projectSettings, translations, currentLang]);
 
-  console.log('reer: ', value);
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className={classNames('w-full flex flex-col items-center', className)}>
       {label && <div className="text-sm font-bold mb-2">{label}</div>}
       <div className="flex items-center w-full">
         <Select
