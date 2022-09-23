@@ -44,7 +44,9 @@ function Link({ from, target }: { from: any; target: any }) {
         <div
           className="bg-gray-50 rounded-md p-2 w-24 flex flex-col cursor-pointer hover:bg-gray-400 transition-all"
           style={{
-            width: '240px',
+            width: 'auto',
+            maxWidth: '320px',
+            overflow: 'hidden',
             height: '128px',
           }}
           onClick={() => {

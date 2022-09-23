@@ -24,7 +24,7 @@ const Editor = ({
   );
 
   let finalValue = !schema.config.template
-    ? contentValue.value
+    ? contentValue?.value
     : schema.config.template || '';
   if (schema.config.template) {
     fields.forEach((f) => {
@@ -45,6 +45,7 @@ const Editor = ({
         value={finalValue}
         options={{
           readOnly: !!schema.config.template,
+          insertSpaces: true,
         }}
         onChange={(v) => {
           if (onValueChange) {

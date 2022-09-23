@@ -53,10 +53,10 @@ function BranchLinkEditDialog() {
               }}
             />
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center flex-grow">
             <div className="text-md text-black font-bold mr-2">Option name</div>
-            <input
-              className="text-md text-black mr-2 w-32 border border-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none"
+            <textarea
+              className="text-md text-black mr-2 border flex-grow border-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none h-32"
               placeholder="option name"
               value={form.optionName}
               onChange={(e) => {
