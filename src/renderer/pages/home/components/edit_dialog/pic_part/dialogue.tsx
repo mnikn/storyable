@@ -40,7 +40,7 @@ function DialogueContent({
       >
         {data.map((item, i) => {
           return (
-            <div className="flex items-center mb-2">
+            <div className="flex items-center mb-2 flex-wrap">
               <FieldSelect
                 className="flex-shrink-0 w-64 mr-4"
                 schema={selectTypeSchema}
@@ -67,6 +67,16 @@ function DialogueContent({
                 value={item.scale}
                 onValueChange={(val) => {
                   data[i].scale = val;
+                  onValueChange();
+                }}
+              />
+              <FieldNumber
+                className="flex-shrink-0 w-12 mr-4"
+                schema={scaleSchema}
+                label="text_size"
+                value={item.text_size}
+                onValueChange={(val) => {
+                  data[i].text_size = val;
                   onValueChange();
                 }}
               />
@@ -110,6 +120,7 @@ function DialogueContent({
             scale: 1,
             flip_h: false,
             flip_v: false,
+            text_size: 18,
             pos: { x: 0, y: 0 },
           });
           onValueChange();
