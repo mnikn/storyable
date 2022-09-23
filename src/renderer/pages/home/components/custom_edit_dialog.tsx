@@ -22,9 +22,9 @@ import PicPart from './edit_dialog/pic_part';
 import ExtraDataPanel from './extra_data/extra_data_panel';
 import FieldString from './extra_data/field/string_field';
 
-const processVarsSchema = new SchemaFieldString();
-processVarsSchema.config = {
-  ...processVarsSchema.config,
+const onJumpProcesssSchema = new SchemaFieldString();
+onJumpProcesssSchema.config = {
+  ...onJumpProcesssSchema.config,
   type: 'multiline',
   needI18n: false,
 };
@@ -160,20 +160,20 @@ function CustomEditDialog() {
               </div>
 
               <div className="text-md text-black mb-2 font-bold">
-                Process var
+                On Jump process
               </div>
               <MonacoEditor
                 className="flex-shrink-0"
                 width="100%"
                 height="200"
                 theme="vs-dark"
-                value={form.processVar}
+                value={form.onJumpProcess}
                 options={{
                   readOnly: false,
                   selectOnLineNumbers: true,
                 }}
                 onChange={(v) => {
-                  form.processVar = v;
+                  form.onJumpProcess = v;
                   setForm((prev) => {
                     return {
                       ...prev,
@@ -225,7 +225,7 @@ function CustomEditDialog() {
                   sourceNode.data.customType = form.customType;
                   sourceNode.data.enableConditions = form.enableConditions;
                   sourceNode.data.customNodeId = form.customNodeId;
-                  sourceNode.data.processVar = form.processVar;
+                  sourceNode.data.onJumpProcess = form.onJumpProcess;
                   sourceNode.data.enableCheck = form.enableCheck;
                   StoryProvider.updateStoryletNode(sourceNode);
                   setForm((prev) => {

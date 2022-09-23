@@ -45,7 +45,7 @@ function Link({ from, target }: { from: any; target: any }) {
           className="bg-gray-50 rounded-md p-2 w-24 flex flex-col cursor-pointer hover:bg-gray-400 transition-all"
           style={{
             width: '240px',
-            height: '64px',
+            height: '128px',
           }}
           onClick={() => {
             eventBus.emit(Event.SHOW_BRANCH_LINK_EDIT_DIALOG, linkData);
@@ -59,7 +59,7 @@ function Link({ from, target }: { from: any; target: any }) {
               <div className="rounded-md w-full bg-gray-500 mt-1 mb-1 h-1" />
             </>
           )}
-          <div className="h-6 text-sm flex justify-center">
+          <div className="h-6 text-3xl flex justify-center">
             {translations[linkData.data.optionName]?.[currentLang]}
           </div>
         </div>

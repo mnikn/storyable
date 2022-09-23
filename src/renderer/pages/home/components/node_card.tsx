@@ -24,6 +24,10 @@ import useEventState from 'renderer/utils/use_event_state';
 import Context from '../context';
 import eventBus, { Event } from '../event';
 import NodeActionMenu from './node_action_menu';
+import BranchNodePopup from './node_card_popup/branch_node_popup';
+import CustomNodePopup from './node_card_popup/custom_node_popup';
+import RootNodePopup from './node_card_popup/root_node_popup';
+import SentenceNodePopup from './node_card_popup/sentence_node_popup';
 import SceneCellPart from './scene_cell_part';
 
 function NodeCard({
@@ -62,6 +66,8 @@ function NodeCard({
   const [quickEditContent, setQuickEditContent] = useState('');
   const quickEditContentRef = useRef(quickEditContent);
   quickEditContentRef.current = quickEditContent;
+
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     if (selectingNode !== nodeId) {
@@ -284,12 +290,21 @@ function NodeCard({
             }
             eventBus.emit(Event.SELECT_NODE, nodeData.id);
           }}
+          onMouseEnter={() => {
+            setShowPopup(true);
+          }}
+          onMouseLeave={() => {
+            setShowPopup(false);
+          }}
         >
           {currentStorylet.name}({nodeData.data.extraData.storylet_id})
           <NodeActionMenu
             visible={isSelecting && !dragingNode}
             sourceNode={nodeData}
           />
+          {(showPopup || isSelecting) && !dragingNode && (
+            <RootNodePopup nodeData={nodeData} />
+          )}
         </div>
       )}
       {nodeData instanceof StoryletSentenceNode && (
@@ -315,6 +330,12 @@ function NodeCard({
             }
             eventBus.emit(Event.SELECT_NODE, nodeData.id);
           }}
+          onMouseEnter={() => {
+            setShowPopup(true);
+          }}
+          onMouseLeave={() => {
+            setShowPopup(false);
+          }}
           ref={dragListen}
         >
           {nodeData.data.customNodeId && (
@@ -381,6 +402,9 @@ function NodeCard({
             visible={isSelecting && !dragingNode}
             sourceNode={nodeData}
           />
+          {(showPopup || isSelecting) && !dragingNode && (
+            <SentenceNodePopup nodeData={nodeData} />
+          )}
         </div>
       )}
       {nodeData instanceof StoryletBranchNode && (
@@ -404,6 +428,12 @@ function NodeCard({
             eventBus.emit(Event.SELECT_NODE, nodeData.id);
           }}
           ref={dragListen}
+          onMouseEnter={() => {
+            setShowPopup(true);
+          }}
+          onMouseLeave={() => {
+            setShowPopup(false);
+          }}
         >
           {nodeData.data.customNodeId && (
             <div
@@ -469,6 +499,9 @@ function NodeCard({
             visible={isSelecting && !dragingNode}
             sourceNode={nodeData}
           />
+          {(showPopup || isSelecting) && !dragingNode && (
+            <BranchNodePopup nodeData={nodeData} />
+          )}
         </div>
       )}
 
@@ -497,12 +530,21 @@ function NodeCard({
               eventBus.emit(Event.SELECT_NODE, nodeData.id);
             }}
             ref={dragListen}
+            onMouseEnter={() => {
+              setShowPopup(true);
+            }}
+            onMouseLeave={() => {
+              setShowPopup(false);
+            }}
           >
             <SceneCellPart nodeData={nodeData} />
             <NodeActionMenu
               visible={isSelecting && !dragingNode}
               sourceNode={nodeData}
             />
+            {(showPopup || isSelecting) && !dragingNode && (
+              <CustomNodePopup nodeData={nodeData} />
+            )}
           </div>
         )}
       {nodeData instanceof StoryletCustomNode &&
@@ -525,6 +567,12 @@ function NodeCard({
               e.stopPropagation();
               eventBus.emit(Event.QUICK_EDIT_END);
               eventBus.emit(Event.SELECT_NODE, nodeData.id);
+            }}
+            onMouseEnter={() => {
+              setShowPopup(true);
+            }}
+            onMouseLeave={() => {
+              setShowPopup(false);
             }}
             ref={dragListen}
           >
@@ -552,6 +600,9 @@ function NodeCard({
               visible={isSelecting && !dragingNode}
               sourceNode={nodeData}
             />
+            {(showPopup || isSelecting) && !dragingNode && (
+              <CustomNodePopup nodeData={nodeData} />
+            )}
           </div>
         )}
     </>

@@ -43,19 +43,23 @@ function RootEditDialog() {
       <>
         {form && (
           <div className="w-full flex flex-col p-2 flex-grow overflow-auto">
-            <div className="text-md text-black mb-2 font-bold">Process var</div>
+            <div className="text-md text-black mb-2 font-bold">
+              On jump process
+            </div>
             <MonacoEditor
               className="block flex-shrink-0"
               width="100%"
               height="200"
               theme="vs-dark"
-              value={form.processVar}
+              value={form.onJumpProcess}
+              language={'python'}
               options={{
                 readOnly: false,
                 selectOnLineNumbers: true,
+                insertSpaces: true,
               }}
               onChange={(v) => {
-                form.processVar = v;
+                form.onJumpProcess = v;
                 setForm((prev) => {
                   return {
                     ...prev,
@@ -69,18 +73,36 @@ function RootEditDialog() {
                 }, 0);
               }}
             />
-            <ConditionPanel
-              conditions={form.enableConditions}
-              onChange={(val) => {
-                form.enableConditions = val;
-                setForm((prev) => {
-                  if (!prev) {
-                    return prev;
-                  }
-                  return { ...prev };
-                });
-              }}
-            />
+
+            <div className="flex flex-col flex-grow">
+              <div className="text-md text-black my-2 font-bold">
+                Enable check
+              </div>
+              <MonacoEditor
+                className="flex-shrink-0"
+                width="100%"
+                height="200"
+                theme="vs-dark"
+                value={form.enableCheck}
+                options={{
+                  readOnly: false,
+                  selectOnLineNumbers: true,
+                }}
+                onChange={(v) => {
+                  form.enableCheck = v;
+                  setForm((prev) => {
+                    return {
+                      ...prev,
+                    };
+                  });
+                }}
+                editorDidMount={(editor) => {
+                  setTimeout(() => {
+                    editor.layout();
+                  }, 0);
+                }}
+              />
+            </div>
           </div>
         )}
         <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">

@@ -102,20 +102,20 @@ function BranchEditDialog() {
             <div className="block flex items-center mb-5">
               <div className="flex flex-col flex-grow">
                 <div className="text-md text-black mb-2 font-bold">
-                  Process var
+                  On jump process
                 </div>
                 <MonacoEditor
                   className="block flex-shrink-0"
                   width="100%"
                   height="200"
                   theme="vs-dark"
-                  value={form.processVar}
+                  value={form.onJumpProcess}
                   options={{
                     readOnly: false,
                     selectOnLineNumbers: true,
                   }}
                   onChange={(v) => {
-                    form.processVar = v;
+                    form.onJumpProcess = v;
                     setForm((prev) => {
                       return {
                         ...prev,
