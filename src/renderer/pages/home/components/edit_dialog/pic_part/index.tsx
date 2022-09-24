@@ -51,10 +51,10 @@ function PicPart({
   const [form, setForm] = useState<any>(sourceNode.data.extraData);
   const [currentTab, setCurrentTab] = useState<Tab>(Tab.Total);
 
-  const scale = 100 / form.bg.crop_arena.width;
+  const scale = 100 / form?.bg?.crop_arena?.width;
   const transform = {
-    x: `${-form.bg.crop_arena.x * scale}%`,
-    y: `${-form.bg.crop_arena.y * scale}%`,
+    x: `${-form?.bg?.crop_arena?.x * scale}%`,
+    y: `${-form?.bg?.crop_arena?.y * scale}%`,
     scale,
     width: 'calc(100% + 0.5px)',
     height: 'auto',
@@ -71,8 +71,8 @@ function PicPart({
 
   const cellSize = (CELL_SIZE as any)[form.size_type];
   const aspect =
-    (CELL_SIZE as any)[form.size_type][0] /
-    (CELL_SIZE as any)[form.size_type][1];
+    (CELL_SIZE as any)[form.size_type]?.[0] /
+    (CELL_SIZE as any)[form.size_type]?.[1];
 
   return (
     <div className="w-full flex flex-col overflow-auto">
@@ -89,8 +89,8 @@ function PicPart({
               image={form?.bg?.pic}
               aspect={aspect}
               objectFit={'vertical-cover'}
-              crop={form.bg.crop_arena.crop}
-              zoom={form.bg.crop_arena.zoom}
+              crop={form.bg.crop_arena?.crop}
+              zoom={form.bg.crop_arena?.zoom}
               onCropChange={(val) => {
                 form.bg.crop_arena.crop = val;
                 setForm((prev) => {
@@ -121,8 +121,8 @@ function PicPart({
           <div
             className="relative bg-gray-500 m-auto flex-shrink-0 overflow-hidden"
             style={{
-              width: cellSize[0],
-              height: cellSize[1],
+              width: cellSize?.[0],
+              height: cellSize?.[1],
             }}
           >
             <div className="h-full">
@@ -138,7 +138,7 @@ function PicPart({
               </div>
             </div>
             {currentTab !== Tab.Actor &&
-              form.actors.map((actor) => {
+              (form?.actors || []).map((actor) => {
                 return (
                   <img
                     className="absolute"
@@ -162,7 +162,7 @@ function PicPart({
                 );
               })}
             {currentTab !== Tab.Decal &&
-              form.decals.map((decal) => {
+              form?.decals?.map((decal) => {
                 return (
                   <img
                     className="absolute"
@@ -178,7 +178,7 @@ function PicPart({
                 );
               })}
             {currentTab !== Tab.Dialogue &&
-              form.dialogues.map((dialogue) => {
+              form?.dialogues?.map((dialogue) => {
                 return (
                   <div
                     className="absolute"
@@ -215,7 +215,7 @@ function PicPart({
                 );
               })}
             {currentTab === Tab.Dialogue &&
-              form.dialogues.map((dialogue) => {
+              form?.dialogues?.map((dialogue) => {
                 return (
                   <div
                     className="absolute cursor-move"
@@ -279,7 +279,7 @@ function PicPart({
                 );
               })}
             {currentTab === Tab.Actor &&
-              form.actors.map((actor) => {
+              form?.actors?.map((actor) => {
                 return (
                   <img
                     ref={(dom: any) => {
@@ -324,7 +324,7 @@ function PicPart({
                 );
               })}
             {currentTab === Tab.Decal &&
-              form.decals.map((decal) => {
+              form?.decals?.map((decal) => {
                 return (
                   <img
                     ref={(dom: any) => {

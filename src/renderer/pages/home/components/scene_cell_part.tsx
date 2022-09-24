@@ -38,13 +38,14 @@ function SceneCellPart({ nodeData }: { nodeData: any }) {
   };
 
   const aspect =
-    (CELL_SIZE as any)[nodeData.data.extraData.size_type][0] /
-    (CELL_SIZE as any)[nodeData.data.extraData.size_type][1];
+    (CELL_SIZE as any)[nodeData.data.extraData.size_type]?.[0] /
+    (CELL_SIZE as any)[nodeData.data.extraData.size_type]?.[1];
 
   return (
     <div className="flex flex-col items-center h-full">
       <div className="text-3xl font-bold mb-5">
         {nodeData.data.customType}({nodeData.data.extraData.size_type})
+        {nodeData.data.customNodeId ? `(${nodeData.data.customNodeId})` : ''}
       </div>
       <div
         className="text-2xl"

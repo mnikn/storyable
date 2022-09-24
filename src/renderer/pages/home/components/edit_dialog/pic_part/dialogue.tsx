@@ -44,7 +44,7 @@ function DialogueContent({
               <FieldSelect
                 className="flex-shrink-0 w-64 mr-4"
                 schema={selectTypeSchema}
-                label="scale"
+                label="type"
                 value={item.type}
                 onValueChange={(val) => {
                   data[i].type = val;
