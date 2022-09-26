@@ -1,6 +1,12 @@
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
+import MonacoEditor from 'react-monaco-editor';
+import Select, { components } from 'react-select';
 import Dialog from 'renderer/components/dialog';
+import {
+  SchemaFieldSelect,
+  SchemaFieldString,
+} from 'renderer/models/schema/schema';
 import {
   StoryletNode,
   StoryletSentenceNode,
@@ -8,13 +14,9 @@ import {
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
 import useEventState from 'renderer/utils/use_event_state';
-import Select, { components } from 'react-select';
 import eventBus, { Event } from '../event';
-import ConditionPanel from './edit_dialog/condition_panel';
 import ExtraDataPanel from './extra_data/extra_data_panel';
-import { SchemaFieldString } from 'renderer/models/schema/schema';
-import FieldString from './extra_data/field/string_field';
-import MonacoEditor from 'react-monaco-editor';
+import FieldSelect from './extra_data/field/select_field';
 
 enum Tab {
   BaseConfig = 'Base config',
@@ -22,7 +24,22 @@ enum Tab {
 }
 
 const onJumpProcesssSchema = new SchemaFieldString();
-onJumpProcesssSchema.config = { ...onJumpProcesssSchema.config, type: 'multiline' };
+onJumpProcesssSchema.config = {
+  ...onJumpProcesssSchema.config,
+  type: 'multiline',
+};
+
+const actorDirectionDirection = new SchemaFieldSelect();
+actorDirectionDirection.config.options = [
+  {
+    label: 'left',
+    value: 'left',
+  },
+  {
+    label: 'right',
+    value: 'right',
+  },
+];
 
 function SentenceEditDialog() {
   const [open, setOpen] = useState(false);
@@ -72,22 +89,40 @@ function SentenceEditDialog() {
       <>
         {form && (
           <div className="w-full flex flex-col p-2 overflow-auto">
-            <div className="block mb-5">
-              <div className="text-md text-black mb-2 font-bold">
-                Custom node id
+            <div className="flex items-center">
+              <div className="block mb-5 mr-5">
+                <div className="text-md text-black mb-2 font-bold">
+                  Custom node id
+                </div>
+                <input
+                  className="resize-none text-md font-normal w-full h-8 outline-none border border-gray-300 rounded-md p-4 focus:ring-blue-500 focus:border-blue-500"
+                  style={{ background: 'none' }}
+                  value={form.customNodeId}
+                  onChange={(e) => {
+                    setForm((prev) => {
+                      if (!prev) {
+                        return prev;
+                      }
+                      return {
+                        ...prev,
+                        customNodeId: e.target.value,
+                      };
+                    });
+                  }}
+                />
               </div>
-              <input
-                className="resize-none text-md font-normal w-full h-8 outline-none border border-gray-300 rounded-md p-4 focus:ring-blue-500 focus:border-blue-500"
-                style={{ background: 'none' }}
-                value={form.customNodeId}
-                onChange={(e) => {
+              <FieldSelect
+                label="Actor direction"
+                value={form.actorDirection}
+                schema={actorDirectionDirection}
+                onValueChange={(val) => {
                   setForm((prev) => {
                     if (!prev) {
                       return prev;
                     }
                     return {
                       ...prev,
-                      customNodeId: e.target.value,
+                      actorDirection: val,
                     };
                   });
                 }}

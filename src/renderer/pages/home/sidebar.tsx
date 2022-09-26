@@ -25,12 +25,16 @@ import eventBus, { Event } from './event';
 function RenameDialog() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
+  const [customGroupId, setCustomGroupId] = useState('');
   const [item, setItem] = useState<Storylet | StoryletGroup | null>(null);
   useEffect(() => {
     const showDialog = (data: Storylet | StoryletGroup) => {
       setOpen(true);
       setItem(data);
       setName(data.name);
+      if (data instanceof StoryletGroup) {
+        setCustomGroupId(data.customGroupId);
+      }
     };
     eventBus.on(Event.SHOW_SIDEBAR_RENAME_DIALOG, showDialog);
     return () => {
@@ -58,6 +62,20 @@ function RenameDialog() {
           }}
         />
       </div>
+      {item instanceof StoryletGroup && (
+        <div className="flex flex-row items-center w-full mb-2">
+          <div className="font-bold mr-2">Custom group id:</div>
+          <input
+            type="text"
+            className="flex-grow border-2 border-gray-300 p-2 rounded-md focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+            placeholder="Please enter the group id..."
+            value={customGroupId}
+            onChange={(e) => {
+              setCustomGroupId(e.target.value);
+            }}
+          />
+        </div>
+      )}
       <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
         <button
           type="button"
@@ -68,6 +86,7 @@ function RenameDialog() {
               StoryProvider.updateStorylet(item);
             } else if (item instanceof StoryletGroup) {
               item.name = name;
+              item.customGroupId = customGroupId;
               StoryProvider.updateStoryletGroup(item);
             }
             setOpen(false);

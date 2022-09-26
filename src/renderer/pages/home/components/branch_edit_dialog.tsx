@@ -12,11 +12,25 @@ import ConditionPanel from './edit_dialog/condition_panel';
 import ActorPart from './edit_dialog/actor_part';
 import ExtraDataPanel from './extra_data/extra_data_panel';
 import MonacoEditor from 'react-monaco-editor';
+import { SchemaFieldSelect } from 'renderer/models/schema/schema';
+import FieldSelect from './extra_data/field/select_field';
 
 enum Tab {
   BaseConfig = 'Base config',
   ExtraData = 'Extra data',
 }
+
+const actorDirectionDirectionSchema = new SchemaFieldSelect();
+actorDirectionDirectionSchema.config.options = [
+  {
+    label: 'left',
+    value: 'left',
+  },
+  {
+    label: 'right',
+    value: 'right',
+  },
+];
 
 function BranchEditDialog() {
   const [open, setOpen] = useState(false);
@@ -49,27 +63,47 @@ function BranchEditDialog() {
       <>
         {form && (
           <div className="w-full flex flex-col p-2 h-86 overflow-auto">
-            <div className="block mb-5">
-              <div className="text-md text-black mb-2 font-bold">
-                Custom node id
+            <div className="flex items-center">
+              <div className="block mb-5 mr-5">
+                <div className="text-md text-black mb-2 font-bold">
+                  Custom node id
+                </div>
+                <input
+                  className="resize-none text-md font-normal w-full h-8 outline-none border border-gray-300 rounded-md p-4 focus:ring-blue-500 focus:border-blue-500"
+                  style={{ background: 'none' }}
+                  value={form.customNodeId}
+                  onChange={(e) => {
+                    setForm((prev) => {
+                      if (!prev) {
+                        return prev;
+                      }
+                      return {
+                        ...prev,
+                        customNodeId: e.target.value,
+                      };
+                    });
+                  }}
+                />
               </div>
-              <input
-                className="resize-none text-md font-normal w-full h-8 outline-none border border-gray-300 rounded-md p-4 focus:ring-blue-500 focus:border-blue-500"
-                style={{ background: 'none' }}
-                value={form.customNodeId}
-                onChange={(e) => {
+
+              <FieldSelect
+                label="Actor direction"
+                value={form.actorDirection}
+                schema={actorDirectionDirectionSchema}
+                onValueChange={(val) => {
                   setForm((prev) => {
                     if (!prev) {
                       return prev;
                     }
                     return {
                       ...prev,
-                      customNodeId: e.target.value,
+                      actorDirection: val,
                     };
                   });
                 }}
               />
             </div>
+
             <ActorPart
               form={form}
               onChange={() => {

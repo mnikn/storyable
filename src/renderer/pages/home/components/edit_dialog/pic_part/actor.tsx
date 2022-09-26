@@ -28,7 +28,7 @@ function ActorContent({
       >
         {data.map((actor, i) => {
           return (
-            <div className="flex items-center mb-2">
+            <div className="flex items-center mb-2" key={i}>
               <FieldActorSelect
                 className="flex-shrink-0 w-80 h-24 mr-4"
                 schema={actorSchema}

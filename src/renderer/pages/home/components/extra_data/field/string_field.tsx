@@ -112,7 +112,6 @@ function FieldString({
     schema.config.needI18n ? translations[value]?.[currentLang] || '' : value
   );
 
-  console.log('reerv: ', schema.config);
   useEffect(() => {
     setContentValue(
       schema.config.needI18n ? translations[value]?.[currentLang] || '' : value

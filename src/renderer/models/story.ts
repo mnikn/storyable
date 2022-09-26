@@ -4,6 +4,7 @@ import { Storylet } from './storylet';
 
 export class StoryletGroup {
   public id: string = `group_${generateUUID()}`;
+  public customGroupId: string = '';
   public name: string = '';
   public parent: StoryletGroup | null = null;
   public children: StoryletGroup[] = [];
@@ -48,6 +49,7 @@ export class StoryletGroup {
     return {
       id: this.id,
       name: this.name,
+      customGroupId: this.customGroupId,
       parentId: this.parent?.id || null,
       children: this.children.map((item) => item.toJson()),
     };
@@ -59,6 +61,7 @@ export class StoryletGroup {
   ): StoryletGroup {
     const intsance = new StoryletGroup();
     intsance.id = json.id;
+    intsance.customGroupId = json.customGroupId;
     intsance.name = json.name;
     intsance.parent = parent;
     intsance.children = json.children.map((item: any) => {

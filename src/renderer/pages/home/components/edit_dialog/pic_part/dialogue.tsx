@@ -40,7 +40,7 @@ function DialogueContent({
       >
         {data.map((item, i) => {
           return (
-            <div className="flex items-center mb-2 flex-wrap">
+            <div className="flex items-center mb-2 flex-wrap" key={i}>
               <FieldSelect
                 className="flex-shrink-0 w-64 mr-4"
                 schema={selectTypeSchema}

@@ -352,23 +352,24 @@ function NodeCard({
           )}
           {(!isQuickEditing || !isSelecting) && (
             <div className="flex cursor-pointer w-full h-full overflow-hidden">
-              {nodeData.data.actor && (
-                <img
-                  className="mr-5 object-contain bg-gray-800 rounded-md"
-                  src={
-                    (
-                      projectSettings.actors.find(
-                        (item: any) => item.id === nodeData.data.actor
-                      )?.portraits || []
-                    ).find((p: any) => p.id === nodeData.data.actorPortrait)
-                      ?.pic || ''
-                  }
-                  alt=""
-                  style={{ width: '100px', height: '100px' }}
-                />
-              )}
+              {nodeData.data.actor &&
+                nodeData.data.actorDirection === 'left' && (
+                  <img
+                    className="mr-5 object-contain bg-gray-800 rounded-md"
+                    src={
+                      (
+                        projectSettings.actors.find(
+                          (item: any) => item.id === nodeData.data.actor
+                        )?.portraits || []
+                      ).find((p: any) => p.id === nodeData.data.actorPortrait)
+                        ?.pic || ''
+                    }
+                    alt=""
+                    style={{ width: '100px', height: '100px' }}
+                  />
+                )}
               <div
-                className="resize-none text-md font-normal overflow-hidden text-ellipsis"
+                className="resize-none text-md font-normal overflow-hidden text-ellipsis flex-grow"
                 style={{
                   lineClamp: 3,
                   display: '-webkit-box',
@@ -378,6 +379,22 @@ function NodeCard({
               >
                 {translations[nodeData.data.content]?.[currentLang]}
               </div>
+              {nodeData.data.actor &&
+                nodeData.data.actorDirection !== 'left' && (
+                  <img
+                    className="mr-5 object-contain bg-gray-800 rounded-md"
+                    src={
+                      (
+                        projectSettings.actors.find(
+                          (item: any) => item.id === nodeData.data.actor
+                        )?.portraits || []
+                      ).find((p: any) => p.id === nodeData.data.actorPortrait)
+                        ?.pic || ''
+                    }
+                    alt=""
+                    style={{ width: '100px', height: '100px' }}
+                  />
+                )}
             </div>
           )}
           {isQuickEditing && isSelecting && (
@@ -449,23 +466,24 @@ function NodeCard({
           )}
           {(!isQuickEditing || !isSelecting) && (
             <div className="flex cursor-pointer w-full h-full overflow-hidden">
-              {nodeData.data.actor && (
-                <img
-                  className="mr-5 object-contain bg-gray-800 rounded-md"
-                  src={
-                    (
-                      projectSettings.actors.find(
-                        (item: any) => item.id === nodeData.data.actor
-                      )?.portraits || []
-                    ).find((p: any) => p.id === nodeData.data.actorPortrait)
-                      ?.pic || ''
-                  }
-                  alt=""
-                  style={{ width: '100px', height: '100px' }}
-                />
-              )}
+              {nodeData.data.actor &&
+                nodeData.data.actorDirection === 'left' && (
+                  <img
+                    className="mr-5 object-contain bg-gray-800 rounded-md"
+                    src={
+                      (
+                        projectSettings.actors.find(
+                          (item: any) => item.id === nodeData.data.actor
+                        )?.portraits || []
+                      ).find((p: any) => p.id === nodeData.data.actorPortrait)
+                        ?.pic || ''
+                    }
+                    alt=""
+                    style={{ width: '100px', height: '100px' }}
+                  />
+                )}
               <div
-                className="resize-none text-md font-normal overflow-hidden text-ellipsis"
+                className="resize-none text-md font-normal overflow-hidden text-ellipsis flex-grow"
                 style={{
                   lineClamp: 3,
                   display: '-webkit-box',
@@ -475,6 +493,22 @@ function NodeCard({
               >
                 {translations[nodeData.data.content]?.[currentLang]}
               </div>
+              {nodeData.data.actor &&
+                nodeData.data.actorDirection !== 'left' && (
+                  <img
+                    className="mr-5 object-contain bg-gray-800 rounded-md"
+                    src={
+                      (
+                        projectSettings.actors.find(
+                          (item: any) => item.id === nodeData.data.actor
+                        )?.portraits || []
+                      ).find((p: any) => p.id === nodeData.data.actorPortrait)
+                        ?.pic || ''
+                    }
+                    alt=""
+                    style={{ width: '100px', height: '100px' }}
+                  />
+                )}
             </div>
           )}
           {isQuickEditing && isSelecting && (

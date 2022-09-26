@@ -49,6 +49,7 @@ export class StoryletRootNode extends StoryletNode<StoryletRootNodeData> {
 export interface StoryletSentenceNodeData extends StoryletNodeData {
   content: string;
   actor: string | null;
+  actorDirection?: string;
   actorPortrait: string | null;
 }
 export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData> {
@@ -62,6 +63,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
       extraData: {},
       actor: null,
       actorPortrait: null,
+      actorDirection: 'left',
     };
   }
 
@@ -76,6 +78,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
     instance.data.customNodeId = json.data.customNodeId;
     instance.data.onJumpProcess = json.data.onJumpProcess;
     instance.data.enableCheck = json.data.enableCheck;
+    instance.data.actorDirection = json.data.actorDirection;
     return instance;
   }
 }
@@ -85,6 +88,7 @@ export interface StoryletBranchNodeData extends StoryletNodeData {
   content: string;
   actor: string | null;
   actorPortrait: string | null;
+  actorDirection?: string;
 }
 export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
   constructor() {
@@ -97,6 +101,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
       extraData: {},
       actor: null,
       actorPortrait: null,
+      actorDirection: 'left',
     };
   }
 
@@ -111,6 +116,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
     instance.data.customNodeId = json.data.customNodeId;
     instance.data.onJumpProcess = json.data.onJumpProcess;
     instance.data.enableCheck = json.data.enableCheck;
+    instance.data.actorDirection = json.data.actorDirection;
     return instance;
   }
 }

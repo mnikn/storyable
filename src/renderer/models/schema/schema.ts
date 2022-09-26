@@ -63,7 +63,7 @@ export function validateValue(
         );
       });
     } else {
-      return schema.config.defaultValue;
+      return [...schema.config.defaultValue];
     }
   }
   if (schema.type === SchemaFieldType.Object) {

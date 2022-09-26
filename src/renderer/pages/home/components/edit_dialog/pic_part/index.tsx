@@ -88,7 +88,7 @@ function PicPart({
             <Cropper
               image={form?.bg?.pic}
               aspect={aspect}
-              objectFit={'vertical-cover'}
+              objectFt={'vertical-cover'}
               crop={form.bg.crop_arena?.crop}
               zoom={form.bg.crop_arena?.zoom}
               onCropChange={(val) => {
@@ -235,14 +235,14 @@ function PicPart({
                       dom.style.bottom = dialogue.pos.y + 'px';
                       const dragListener = d3.drag().on('drag', (val) => {
                         dialogue.pos.x += val.dx / dialogue.scale;
-                        dialogue.pos.x = Math.max(-50, dialogue.pos.x);
+                        dialogue.pos.x = Math.max(-150, dialogue.pos.x);
                         dialogue.pos.x = Math.min(
                           cellSize[0] - 50,
                           dialogue.pos.x
                         );
 
                         dialogue.pos.y -= val.dy / dialogue.scale;
-                        dialogue.pos.y = Math.max(-50, dialogue.pos.y);
+                        dialogue.pos.y = Math.max(-100, dialogue.pos.y);
                         dialogue.pos.y = Math.min(
                           cellSize[1] - 50,
                           dialogue.pos.y
