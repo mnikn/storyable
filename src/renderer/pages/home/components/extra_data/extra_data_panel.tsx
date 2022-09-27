@@ -86,7 +86,7 @@ function ExtraDataPanel({
           schema={schema}
           value={form}
           onValueChange={(val) => {
-            setForm(val);
+            setForm(validateValue(val, val, schema, {}));
           }}
         />
       </div>

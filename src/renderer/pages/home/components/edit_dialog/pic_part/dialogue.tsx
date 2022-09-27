@@ -6,6 +6,7 @@ import {
   SchemaFieldSelect,
   SchemaFieldString,
 } from 'renderer/models/schema/schema';
+import { generateUUID } from 'renderer/utils/uuid';
 import FieldBoolean from '../../extra_data/field/boolean_field';
 import FieldNumber from '../../extra_data/field/number_field';
 import FieldSelect from '../../extra_data/field/select_field';
@@ -116,7 +117,7 @@ function DialogueContent({
         onClick={() => {
           data.push({
             type: 'talk_normal',
-            content: '',
+            content: 'extra_field_' + generateUUID(),
             scale: 1,
             flip_h: false,
             flip_v: false,
