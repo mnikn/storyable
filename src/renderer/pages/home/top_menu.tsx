@@ -4,12 +4,17 @@ import eventBus, { Event } from './event';
 import useEventState from 'renderer/utils/use_event_state';
 import StoryProvider from 'renderer/services/story_provider';
 import { PROJECT_PATH } from 'renderer/constatnts/storage_key';
+import { useContext } from 'react';
+import Context from './context';
 
 const MENU_ID = 'top-menu';
 function TopMenu() {
   const { show: showMenu } = useContextMenu({
     id: MENU_ID,
   });
+
+  const { multiSelectMode } = useContext(Context);
+
   const projectSettings = useEventState<any>({
     property: 'projectSettings',
     event: StoryProvider.event,
@@ -37,6 +42,17 @@ function TopMenu() {
           top: '12px',
         }}
       >
+        <div className="flex items-center">
+          <div className="text-sm text-white mr-2">multi-select</div>
+          <input
+            className="cursor-pointer"
+            type="checkbox"
+            value={multiSelectMode as any}
+            onChange={() => {
+              eventBus.emit(Event.TOGGLE_MULTI_SELECT);
+            }}
+          />
+        </div>
         <CgPlayButton
           className="text-5xl text-white cursor-pointer hover:text-gray-800 transition-all"
           onClick={() => {

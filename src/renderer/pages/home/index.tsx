@@ -30,6 +30,8 @@ import PreviewDialog from './components/preview_dialog';
 import MoveDialog from './move_dialog';
 import RootEditDialog from './components/root_edit_dialog';
 import CustomEditDialog from './components/custom_edit_dialog';
+import { uniq } from 'lodash';
+import MultiEditDialog from './components/multi_edit_dialog';
 
 function Home() {
   const [zoomDom, setZoomDom] = useState<HTMLDivElement | null>(null);
@@ -47,6 +49,9 @@ function Home() {
   dragingNodeRef.current = dragingNode;
   const dragTargetRef = useRef<any>(null);
 
+  const [multiSelectMode, setMultiSelectMode] = useState(false);
+  const [selectingNodes, setSelectingNodes] = useState<any[]>([]);
+
   const { zoom, treeData, linkData } = useView({
     zoomDom,
     dragingNode,
@@ -61,13 +66,13 @@ function Home() {
       return;
     }
     if (treeData.length > 0) {
-      console.log(treeData);
       eventBus.emit(Event.SELECT_NODE, treeData[treeData.length - 1].data.id);
       setInit(true);
     }
   }, [treeData]);
 
   useShortcut({
+    multiSelectMode,
     selectingNode,
     isQuickEditing,
     isDialogEditing: isDialogShowing,
@@ -75,12 +80,29 @@ function Home() {
 
   useEffect(() => {
     const onSelectNode = (node: string) => {
-      setSelectingNode((prev) => {
-        if (prev === node) {
-          return null;
-        }
-        return node;
-      });
+      if (multiSelectMode) {
+        setSelectingNodes((prev) => {
+          if (prev.includes(node)) {
+            return uniq(prev.filter((x) => x !== node));
+          } else {
+            if (
+              prev.length > 0 &&
+              StoryProvider.currentStorylet?.nodes[prev[0]]?.data?.type !==
+                StoryProvider.currentStorylet?.nodes[node]?.data?.type
+            ) {
+              return prev;
+            }
+            return uniq(prev.concat(node));
+          }
+        });
+      } else {
+        setSelectingNode((prev) => {
+          if (prev === node) {
+            return null;
+          }
+          return node;
+        });
+      }
       /* const dom = document.querySelector(`#${node}`);
          * if (dom) {
          *   const rect = dom.getBoundingClientRect();
@@ -319,12 +341,23 @@ function Home() {
       eventBus.off(Event.DUPLICATE_SIBLING_NODE, duplicateSiblingNode);
       eventBus.off(Event.SAVE, onSave);
     };
-  }, [zoom, selectingNode]);
+  }, [zoom, selectingNode, multiSelectMode]);
 
   const onDomMounted = useCallback((dom: HTMLDivElement) => {
     if (dom) {
       setZoomDom(dom);
     }
+  }, []);
+
+  useEffect(() => {
+    const onToggle = () => {
+      setMultiSelectMode((prev) => !prev);
+      setSelectingNodes([]);
+    };
+    eventBus.on(Event.TOGGLE_MULTI_SELECT, onToggle);
+    return () => {
+      eventBus.off(Event.TOGGLE_MULTI_SELECT, onToggle);
+    };
   }, []);
 
   return (
@@ -333,6 +366,8 @@ function Home() {
         selectingNode,
         isQuickEditing,
         dragingNode,
+        selectingNodes,
+        multiSelectMode,
       }}
     >
       <div className="flex h-full">
@@ -427,6 +462,7 @@ function Home() {
       <BranchEditDialog />
       <BranchLinkEditDialog />
       <CustomEditDialog />
+      <MultiEditDialog />
       <ProjectSettingsDialog />
       <RootEditDialog />
       <PreviewDialog />

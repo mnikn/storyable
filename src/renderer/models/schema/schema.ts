@@ -34,7 +34,7 @@ export function iterSchema(
   fn(schema, path);
   if (schema instanceof SchemaFieldObject) {
     schema.fields.forEach((f) => {
-      iterSchema(f.data, fn, f.name);
+      iterSchema(f.data, fn, path ? path + '.' + f.name : f.name);
     });
   }
 }

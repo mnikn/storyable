@@ -36,6 +36,9 @@ export enum Event {
 
   UPDATE_VIEW_POS = 'update_view_pos',
   SAVE = 'save',
+
+  TOGGLE_MULTI_SELECT = 'toggle_multi_select',
+  SHOW_MULTI_EDIT_DIALOG = 'show_multi_edit_dialog',
 }
 
 export default new EventEmitter();

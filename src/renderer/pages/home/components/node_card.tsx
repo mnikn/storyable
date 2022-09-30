@@ -60,7 +60,13 @@ function NodeCard({
     initialVal: StoryProvider.projectSettings,
   });
 
-  const { selectingNode, isQuickEditing, dragingNode } = useContext(Context);
+  const {
+    selectingNode,
+    isQuickEditing,
+    dragingNode,
+    multiSelectMode,
+    selectingNodes,
+  } = useContext(Context);
   const nodeData = currentStorylet?.nodes[nodeId];
 
   const [quickEditContent, setQuickEditContent] = useState('');
@@ -246,7 +252,9 @@ function NodeCard({
     return null;
   }
 
-  const isSelecting = selectingNode === nodeId;
+  const isSelecting = !multiSelectMode
+    ? selectingNode === nodeId
+    : selectingNodes.includes(nodeId);
 
   /* const scale = 100 / nodeData.data.extraData.bg.crop_arena.width;
    * const transform = {
@@ -266,6 +274,18 @@ function NodeCard({
    *   transformOrigin: 'top left',
    * };
    */
+
+  const selectNode = useCallback(
+    (e) => {
+      e.stopPropagation();
+      if (dragingNode) {
+        return;
+      }
+      eventBus.emit(Event.SELECT_NODE, nodeData.id);
+    },
+    [dragingNode, multiSelectMode]
+  );
+
   return (
     <>
       {nodeData instanceof StoryletRootNode && (
@@ -283,13 +303,7 @@ function NodeCard({
             width: '400px',
             zIndex: isSelecting ? '2' : '1',
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (dragingNode) {
-              return;
-            }
-            eventBus.emit(Event.SELECT_NODE, nodeData.id);
-          }}
+          onClick={selectNode}
           onMouseEnter={() => {
             setShowPopup(true);
           }}
@@ -322,14 +336,7 @@ function NodeCard({
             width: '500px',
             zIndex: isSelecting ? '2' : '1',
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (isSelecting) {
-              /* setQuickEditing(false); */
-              eventBus.emit(Event.QUICK_EDIT_END);
-            }
-            eventBus.emit(Event.SELECT_NODE, nodeData.id);
-          }}
+          onClick={selectNode}
           onMouseEnter={() => {
             setShowPopup(true);
           }}
@@ -439,11 +446,7 @@ function NodeCard({
             width: '500px',
             zIndex: isSelecting ? '2' : '1',
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            eventBus.emit(Event.QUICK_EDIT_END);
-            eventBus.emit(Event.SELECT_NODE, nodeData.id);
-          }}
+          onClick={selectNode}
           ref={dragListen}
           onMouseEnter={() => {
             setShowPopup(true);
@@ -558,11 +561,7 @@ function NodeCard({
               // height: '406px',
               zIndex: isSelecting ? '2' : '1',
             }}
-            onClick={(e) => {
-              e.stopPropagation();
-              eventBus.emit(Event.QUICK_EDIT_END);
-              eventBus.emit(Event.SELECT_NODE, nodeData.id);
-            }}
+            onClick={selectNode}
             ref={dragListen}
             onMouseEnter={() => {
               setShowPopup(true);
@@ -597,11 +596,7 @@ function NodeCard({
               width: '400px',
               zIndex: isSelecting ? '2' : '1',
             }}
-            onClick={(e) => {
-              e.stopPropagation();
-              eventBus.emit(Event.QUICK_EDIT_END);
-              eventBus.emit(Event.SELECT_NODE, nodeData.id);
-            }}
+            onClick={selectNode}
             onMouseEnter={() => {
               setShowPopup(true);
             }}

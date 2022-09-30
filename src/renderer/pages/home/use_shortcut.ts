@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
   StoryletCustomNode,
   StoryletBranchNode,
@@ -10,10 +10,12 @@ import Context from './context';
 import eventBus, { Event } from './event';
 
 function useShortcut({
+  multiSelectMode,
   selectingNode,
   isQuickEditing,
   isDialogEditing,
 }: {
+  multiSelectMode: boolean;
   selectingNode: string | null;
   isQuickEditing: boolean;
   isDialogEditing: boolean;
@@ -75,6 +77,10 @@ function useShortcut({
       }
 
       if (e.code === 'KeyE') {
+        if (multiSelectMode) {
+          eventBus.emit(Event.SHOW_MULTI_EDIT_DIALOG);
+          return;
+        }
         if (currentSelectingNode instanceof StoryletSentenceNode) {
           eventBus.emit(Event.SHOW_SENTENCE_EDIT_DIALOG, currentSelectingNode);
         } else if (currentSelectingNode instanceof StoryletBranchNode) {
@@ -101,13 +107,13 @@ function useShortcut({
         e.preventDefault();
         eventBus.emit(Event.DELETE_NODE, currentSelectingNode);
       }
-      if (
-        e.code === 'Space' &&
-        !(currentSelectingNode instanceof StoryletRootNode)
-      ) {
-        e.preventDefault();
-        eventBus.emit(Event.QUICK_EDIT_START);
-      }
+      // if (
+      //   e.code === 'Space' &&
+      //   !(currentSelectingNode instanceof StoryletRootNode)
+      // ) {
+      //   e.preventDefault();
+      //   eventBus.emit(Event.QUICK_EDIT_START);
+      // }
 
       if (e.code === 'ArrowLeft' && parent) {
         eventBus.emit(Event.SELECT_NODE, parent.id);
@@ -143,7 +149,7 @@ function useShortcut({
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [selectingNode, isQuickEditing, isDialogEditing]);
+  }, [selectingNode, isQuickEditing, isDialogEditing, multiSelectMode]);
 }
 
 export default useShortcut;
