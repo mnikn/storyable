@@ -314,7 +314,7 @@ class StoryProvider {
   }
 
   public duplicateStorylet(storylet: Storylet) {
-    const newStorylet = new Storylet();
+    const newStorylet = new Storylet(false);
     newStorylet.id = generateUUID();
     newStorylet.name =
       'storylet' + (Object.keys(this.story.storylets).length + 1);

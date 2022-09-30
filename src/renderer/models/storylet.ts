@@ -156,10 +156,12 @@ export class Storylet extends Tree<StoryletNodeData> {
   public name: string = '';
   public conditions: any[] = [];
 
-  constructor() {
+  constructor(newRoot = true) {
     super();
-    const node = new StoryletRootNode();
-    this.upsertNode(node);
+    if (newRoot) {
+      const node = new StoryletRootNode();
+      this.upsertNode(node);
+    }
   }
 
   public findParent(
