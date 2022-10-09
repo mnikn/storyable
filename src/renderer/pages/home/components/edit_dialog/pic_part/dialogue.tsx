@@ -13,18 +13,25 @@ import FieldSelect from '../../extra_data/field/select_field';
 import FieldString from '../../extra_data/field/string_field';
 
 const selectTypeSchema = new SchemaFieldSelect();
-selectTypeSchema.config.options = Object.keys(DIALOGUE_PIC).map((k) => {
-  return {
-    label: k,
-    value: k,
-  };
-});
+selectTypeSchema.config.options = Object.keys(DIALOGUE_PIC)
+  .map((k) => {
+    return {
+      label: k,
+      value: k,
+    };
+  })
+  .concat({
+    label: 'text',
+    value: 'text',
+  });
 const contentSchema = new SchemaFieldString();
 contentSchema.config.type = 'multiline';
 contentSchema.config.needI18n = true;
 const scaleSchema = new SchemaFieldNumber();
 const flipHSchema = new SchemaFieldBoolean();
 const flipVSchema = new SchemaFieldBoolean();
+const rotationSchema = new SchemaFieldNumber();
+const textColorSchema = new SchemaFieldString();
 
 function DialogueContent({
   data,
@@ -81,6 +88,26 @@ function DialogueContent({
                   onValueChange();
                 }}
               />
+              <FieldNumber
+                className="flex-shrink-0 w-12 mr-4"
+                schema={rotationSchema}
+                label="rotation"
+                value={item.rotation}
+                onValueChange={(val) => {
+                  data[i].rotation = val;
+                  onValueChange();
+                }}
+              />
+              <FieldString
+                className="flex-shrink-0 w-48 mr-4"
+                schema={textColorSchema}
+                label="text_color"
+                value={item.text_color}
+                onValueChange={(val) => {
+                  data[i].text_color = val;
+                  onValueChange();
+                }}
+              />
               <FieldBoolean
                 className="flex-shrink-0 w-12 mr-4"
                 schema={flipHSchema}
@@ -122,7 +149,9 @@ function DialogueContent({
             flip_h: false,
             flip_v: false,
             text_size: 18,
+            rotation: 0,
             pos: { x: 0, y: 0 },
+            text_color: '#000000',
           });
           onValueChange();
         }}

@@ -187,6 +187,34 @@ function CustomEditDialog() {
                 }}
               />
 
+              <div className="text-md text-black mb-2 font-bold">
+                After Jump process
+              </div>
+              <MonacoEditor
+                className="flex-shrink-0"
+                width="100%"
+                height="200"
+                theme="vs-dark"
+                value={form.afterJumpProcess}
+                options={{
+                  readOnly: false,
+                  selectOnLineNumbers: true,
+                }}
+                onChange={(v) => {
+                  form.afterJumpProcess = v;
+                  setForm((prev) => {
+                    return {
+                      ...prev,
+                    };
+                  });
+                }}
+                editorDidMount={(editor) => {
+                  setTimeout(() => {
+                    editor.layout();
+                  }, 0);
+                }}
+              />
+
               <div className="text-md text-black my-2 font-bold">
                 Enable check
               </div>
@@ -226,6 +254,7 @@ function CustomEditDialog() {
                   sourceNode.data.enableConditions = form.enableConditions;
                   sourceNode.data.customNodeId = form.customNodeId;
                   sourceNode.data.onJumpProcess = form.onJumpProcess;
+                  sourceNode.data.afterJumpProcess = form.afterJumpProcess;
                   sourceNode.data.enableCheck = form.enableCheck;
                   StoryProvider.updateStoryletNode(sourceNode);
                   setForm((prev) => {

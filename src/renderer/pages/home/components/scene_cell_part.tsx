@@ -127,30 +127,33 @@ function SceneCellPart({ nodeData }: { nodeData: any }) {
           })}
         </div>
         {(nodeData.data.extraData?.dialogues || []).map((dialogue) => {
-          if (dialogue.type === 'text') {
-            return (
-              <>
+          {
+            /* if (dialogue.type === 'text') {
+                return (
+                <>
                 <div
-                  className="absolute"
-                  style={{
-                    width: dialogue.rotation === 0 ? '208px' : undefined,
-                    height: dialogue.rotation === 0 ? '128px' : undefined,
-                    transform: `scaleX(${dialogue.flip_h ? -1 : 1}) scaleY(${
-                      dialogue.flip_v ? -1 : 1
-                    }) rotate(${dialogue.rotation}deg)`,
-                    top: dialogue.pos.y + 'px',
-                    left: dialogue.pos.x + 'px',
-                    color: dialogue.text_color,
-                    fontSize: `${dialogue.text_size || 18}px`,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
+                className="absolute"
+                style={{
+                width: dialogue.rotation === 0 ? '208px' : undefined,
+                height: dialogue.rotation === 0 ? '128px' : undefined,
+                transform: `scaleX(${dialogue.flip_h ? -1 : 1}) scaleY(${
+                dialogue.flip_v ? -1 : 1
+                }) rotate(${dialogue.rotation}deg)`,
+                top: dialogue.pos.y + 'px',
+                left: dialogue.pos.x + 'px',
+                color: dialogue.text_color,
+                fontSize: `${dialogue.text_size || 18}px`,
+                display: 'flex',
+                alignItems: 'center',
+                }}
                 >
-                  {translations[dialogue.content]?.[currentLang]}
+                {translations[dialogue.content]?.[currentLang]}
                 </div>
-              </>
-            );
+                </>
+                );
+                } */
           }
+
           return (
             <div
               className="absolute"
@@ -162,8 +165,8 @@ function SceneCellPart({ nodeData }: { nodeData: any }) {
                 transform: `scaleX(${dialogue.scale}) scaleY(${dialogue.scale})`,
               }}
             >
-              {dialogue.type !== 'text' && (
-                <>
+              <>
+                {dialogue.type !== 'text' && (
                   <img
                     className="absolute"
                     src={DIALOGUE_PIC[dialogue.type]}
@@ -174,20 +177,25 @@ function SceneCellPart({ nodeData }: { nodeData: any }) {
                       })`,
                     }}
                   />
-                  <div
-                    className="absolute"
-                    style={{
-                      left: '50%',
-                      top: '50%',
-                      transform: 'translateX(-50%) translateY(-50%)',
-                      fontSize: `${dialogue.text_size || 18}px`,
-                      color: dialogue.text_color,
-                    }}
-                  >
-                    {translations[dialogue.content]?.[currentLang]}
-                  </div>
-                </>
-              )}
+                )}
+                <div
+                  className="absolute"
+                  style={{
+                    left: dialogue.type === 'text' ? '0' : '50%',
+                    top: '50%',
+                    transform:
+                      dialogue.type === 'text'
+                        ? `translateX(0) translateY(-50%) rotate(${dialogue.rotation || 0}deg)`
+                        : `translateX(-50%) translateY(-50%) rotate(${dialogue.rotation || 0}deg)`,
+                    fontSize: `${dialogue.text_size || 18}px`,
+                    color: dialogue.text_color,
+                    wordBreak:
+                      dialogue.type === 'text' ? 'keep-all' : 'initial',
+                  }}
+                >
+                  {translations[dialogue.content]?.[currentLang]}
+                </div>
+              </>
             </div>
           );
         })}

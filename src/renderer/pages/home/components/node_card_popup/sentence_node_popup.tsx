@@ -3,6 +3,7 @@ import MonacoEditor from 'react-monaco-editor';
 function SentenceNodePopup({ nodeData }) {
   if (
     !nodeData.data.onJumpProcess &&
+    !nodeData.data.afterJumpProcess &&
     !nodeData.data.enableCheck
   ) {
     return null;
@@ -28,6 +29,31 @@ function SentenceNodePopup({ nodeData }) {
             height="400px"
             theme="vs-dark"
             value={nodeData.data.onJumpProcess}
+            options={{
+              readOnly: true,
+              selectOnLineNumbers: true,
+              fontSize: 26,
+            }}
+            editorDidMount={(editor) => {
+              setTimeout(() => {
+                editor.layout();
+                editor.focus();
+              }, 0);
+            }}
+          />
+        </div>
+      )}
+      {nodeData.data.afterJumpProcess && (
+        <div className="flex flex-col mr-12 items-center">
+          <div className="text-3xl text-black mb-2 font-bold">
+            After Jump process
+          </div>
+          <MonacoEditor
+            className="block flex-shrink-0"
+            width="800px"
+            height="400px"
+            theme="vs-dark"
+            value={nodeData.data.afterJumpProcess}
             options={{
               readOnly: true,
               selectOnLineNumbers: true,

@@ -248,10 +248,6 @@ function NodeCard({
     return content;
   }, [nodeData]);
 
-  if (!nodeData) {
-    return null;
-  }
-
   const isSelecting = !multiSelectMode
     ? selectingNode === nodeId
     : selectingNodes.includes(nodeId);

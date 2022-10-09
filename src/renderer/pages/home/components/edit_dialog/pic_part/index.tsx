@@ -187,26 +187,37 @@ function PicPart({
                       height: '128px',
                       bottom: dialogue.pos.y + 'px',
                       left: dialogue.pos.x + 'px',
-                      transform: `scaleX(${dialogue.scale}) scaleY(${dialogue.scale})`,
+                      transform: `scaleX(${dialogue.scale}) scaleY(${
+                        dialogue.scale
+                      })
+rotate(${dialogue.rotation || 0}deg)
+`,
                     }}
                   >
-                    <img
-                      className="absolute"
-                      style={{
-                        transform: `scaleX(${
-                          dialogue.flip_h ? -1 : 1
-                        }) scaleY(${dialogue.flip_v ? -1 : 1})`,
-                      }}
-                      src={DIALOGUE_PIC[dialogue.type]}
-                    />
+                    {dialogue.type !== 'text' && (
+                      <img
+                        className="absolute"
+                        style={{
+                          transform: `scaleX(${
+                            dialogue.flip_h ? -1 : 1
+                          }) scaleY(${dialogue.flip_v ? -1 : 1})`,
+                        }}
+                        src={DIALOGUE_PIC[dialogue.type]}
+                      />
+                    )}
                     <div
                       className="absolute"
                       style={{
-                        left: '50%',
+                        left: dialogue.type === 'text' ? '0' : '50%',
                         top: '50%',
-                        transform: 'translateX(-50%) translateY(-50%)',
+                        transform:
+                          dialogue.type === 'text'
+                            ? 'translateX(0) translateY(-50%)'
+                            : 'translateX(-50%) translateY(-50%)',
                         fontSize: `${dialogue.text_size || 18}px`,
                         color: dialogue.text_color,
+                        wordBreak:
+                          dialogue.type === 'text' ? 'keep-all' : 'initial',
                       }}
                     >
                       {translations[dialogue.content]?.[currentLang]}
@@ -224,7 +235,11 @@ function PicPart({
                       height: '128px',
                       bottom: dialogue.pos.y + 'px',
                       left: dialogue.pos.x + 'px',
-                      transform: `scaleX(${dialogue.scale}) scaleY(${dialogue.scale})`,
+                      transform: `scaleX(${dialogue.scale}) scaleY(${
+                        dialogue.scale
+                      })
+rotate(${dialogue.rotation || 0}deg)
+`,
                       outline: '5px solid black',
                     }}
                     ref={(dom: any) => {
@@ -254,23 +269,30 @@ function PicPart({
                       dragListener(d3.select(dom));
                     }}
                   >
-                    <img
-                      className="absolute"
-                      style={{
-                        transform: `scaleX(${
-                          dialogue.flip_h ? -1 : 1
-                        }) scaleY(${dialogue.flip_v ? -1 : 1})`,
-                      }}
-                      src={DIALOGUE_PIC[dialogue.type]}
-                    />
+                    {dialogue.type !== 'text' && (
+                      <img
+                        className="absolute"
+                        style={{
+                          transform: `scaleX(${
+                            dialogue.flip_h ? -1 : 1
+                          }) scaleY(${dialogue.flip_v ? -1 : 1})`,
+                        }}
+                        src={DIALOGUE_PIC[dialogue.type]}
+                      />
+                    )}
                     <div
                       className="absolute"
                       style={{
-                        left: '50%',
+                        left: dialogue.type === 'text' ? '0' : '50%',
                         top: '50%',
-                        transform: 'translateX(-50%) translateY(-50%)',
+                        transform:
+                          dialogue.type === 'text'
+                            ? 'translateX(0) translateY(-50%)'
+                            : 'translateX(-50%) translateY(-50%)',
                         fontSize: `${dialogue.text_size || 18}px`,
                         color: dialogue.text_color,
+                        wordBreak:
+                          dialogue.type === 'text' ? 'keep-all' : 'initial',
                       }}
                     >
                       {translations[dialogue.content]?.[currentLang]}

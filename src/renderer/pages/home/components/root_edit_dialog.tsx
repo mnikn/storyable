@@ -74,6 +74,37 @@ function RootEditDialog() {
               }}
             />
 
+            <div className="text-md text-black mb-2 font-bold">
+              After jump process
+            </div>
+            <MonacoEditor
+              className="block flex-shrink-0"
+              width="100%"
+              height="200"
+              theme="vs-dark"
+              value={form.afterJumpProcess}
+              language={'python'}
+              options={{
+                readOnly: false,
+                selectOnLineNumbers: true,
+                insertSpaces: true,
+              }}
+              onChange={(v) => {
+                form.afterJumpProcess = v;
+                setForm((prev) => {
+                  return {
+                    ...prev,
+                  };
+                });
+              }}
+              editorDidMount={(editor) => {
+                setTimeout(() => {
+                  editor.layout();
+                  editor.focus();
+                }, 0);
+              }}
+            />
+
             <div className="flex flex-col flex-grow">
               <div className="text-md text-black my-2 font-bold">
                 Enable check

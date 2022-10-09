@@ -17,6 +17,7 @@ export interface StoryletNodeData {
   customNodeId?: string;
   enableCheck?: string;
   onJumpProcess?: any;
+  afterJumpProcess?: any;
 }
 export class StoryletNode<D extends StoryletNodeData> extends Node<D> {}
 
@@ -30,6 +31,7 @@ export class StoryletRootNode extends StoryletNode<StoryletRootNodeData> {
       enableConditions: [],
       extraData: {},
       onJumpProcess: '',
+      afterJumpProcess: '',
     };
   }
 
@@ -40,6 +42,7 @@ export class StoryletRootNode extends StoryletNode<StoryletRootNodeData> {
     instance.data.extraData = json.data.extraData || {};
     instance.data.customNodeId = json.data.customNodeId;
     instance.data.onJumpProcess = json.data.onJumpProcess;
+    instance.data.afterJumpProcess = json.data.afterJumpProcess;
     instance.data.enableCheck = json.data.enableCheck;
     return instance;
   }
@@ -77,6 +80,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
     instance.data.actorPortrait = json.data.actorPortrait;
     instance.data.customNodeId = json.data.customNodeId;
     instance.data.onJumpProcess = json.data.onJumpProcess;
+    instance.data.afterJumpProcess = json.data.afterJumpProcess;
     instance.data.enableCheck = json.data.enableCheck;
     instance.data.actorDirection = json.data.actorDirection;
     return instance;
@@ -115,6 +119,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
     instance.data.actorPortrait = json.data.actorPortrait;
     instance.data.customNodeId = json.data.customNodeId;
     instance.data.onJumpProcess = json.data.onJumpProcess;
+    instance.data.afterJumpProcess = json.data.afterJumpProcess;
     instance.data.enableCheck = json.data.enableCheck;
     instance.data.actorDirection = json.data.actorDirection;
     return instance;
@@ -145,6 +150,7 @@ export class StoryletCustomNode extends StoryletNode<StoryletCustomNodeData> {
     instance.data.enableConditions = json.data.enableConditions;
     instance.data.customNodeId = json.data.customNodeId;
     instance.data.onJumpProcess = json.data.onJumpProcess;
+    instance.data.afterJumpProcess = json.data.afterJumpProcess;
     instance.data.enableCheck = json.data.enableCheck;
     return instance;
   }

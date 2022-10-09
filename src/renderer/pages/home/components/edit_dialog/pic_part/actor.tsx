@@ -85,7 +85,7 @@ function ActorContent({
         onClick={() => {
           data.push({
             actor: { id: null, portrait: null },
-            scale: 1,
+            scale: 2,
             flip_h: false,
             flip_v: false,
             pos: { x: 0, y: 0 },
