@@ -25,7 +25,7 @@ import {
 } from 'renderer/models/schema/schema';
 import { buildSchema } from 'renderer/models/schema/factory';
 import { iterObject } from 'renderer/utils/object';
-import { cloneDeep, get, set } from 'lodash';
+import { cloneDeep, get, set, forOwn, difference } from 'lodash';
 
 const OBJ_JSON = {
   type: 'object',
@@ -578,6 +578,26 @@ class StoryProvider {
         this.updateTranslateKeyAll(get(data, path), extraTranslations);
       }
     });
+  }
+
+  public removeUselessTranslations() {
+    const translateKeys: any[] = [];
+    this.story.storylets.forEach((s) => {
+      Object.values(s.data.nodes).forEach((node) => {
+        iterObject(node.toJson(), (_, value) => {
+          if (typeof value === 'string') {
+            translateKeys.push(value);
+          }
+        });
+      });
+    });
+
+    const diffKeys = difference(Object.keys(this.translations), translateKeys);
+    const newTranslations = { ...this.translations };
+    diffKeys.forEach((key) => {
+      delete newTranslations[key];
+    });
+    this.updateTranslations(newTranslations);
   }
 }
 

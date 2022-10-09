@@ -133,13 +133,13 @@ function BranchEditDialog() {
               />
             </div>
 
-            <div className="block flex items-center mb-5">
+            <div className="flex block">
               <div className="flex flex-col flex-grow">
-                <div className="text-md text-black mb-2 font-bold">
-                  On jump process
+                <div className="text-md text-black mb-2 font-bold flex">
+                  On Jump process
                 </div>
                 <MonacoEditor
-                  className="block flex-shrink-0"
+                  className="flex-shrink-0"
                   width="100%"
                   height="200"
                   theme="vs-dark"
@@ -163,15 +163,13 @@ function BranchEditDialog() {
                   }}
                 />
               </div>
-            </div>
 
-            <div className="block flex items-center mb-5">
               <div className="flex flex-col flex-grow">
                 <div className="text-md text-black mb-2 font-bold">
-                  After jump process
+                  After Jump process
                 </div>
                 <MonacoEditor
-                  className="block flex-shrink-0"
+                  className="flex-shrink-0"
                   width="100%"
                   height="200"
                   theme="vs-dark"

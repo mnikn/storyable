@@ -306,6 +306,7 @@ function Home() {
     eventBus.on(Event.SHOW_SIDEBAR_RENAME_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_CUSTOM_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.SHOW_ROOT_EDIT_DIALOG, onDialogShow);
+    eventBus.on(Event.SHOW_MULTI_EDIT_DIALOG, onDialogShow);
     eventBus.on(Event.ON_SHOW_DIALOG, onDialogShow);
     eventBus.on(Event.CLOSE_DIALOG, onDialogClose);
     eventBus.on(Event.DRAG_NODE, onDragNode);
@@ -330,6 +331,7 @@ function Home() {
       eventBus.off(Event.SHOW_SIDEBAR_RENAME_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_CUSTOM_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.SHOW_ROOT_EDIT_DIALOG, onDialogShow);
+      eventBus.off(Event.SHOW_MULTI_EDIT_DIALOG, onDialogShow);
       eventBus.off(Event.ON_SHOW_DIALOG, onDialogShow);
       eventBus.off(Event.CLOSE_DIALOG, onDialogClose);
       eventBus.off(Event.DRAG_NODE, onDragNode);

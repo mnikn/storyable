@@ -22,13 +22,6 @@ import PicPart from './edit_dialog/pic_part';
 import ExtraDataPanel from './extra_data/extra_data_panel';
 import FieldString from './extra_data/field/string_field';
 
-const onJumpProcesssSchema = new SchemaFieldString();
-onJumpProcesssSchema.config = {
-  ...onJumpProcesssSchema.config,
-  type: 'multiline',
-  needI18n: false,
-};
-
 enum Tab {
   BaseConfig = 'Base config',
   Data = 'Extra data',
@@ -159,61 +152,67 @@ function CustomEditDialog() {
                 />
               </div>
 
-              <div className="text-md text-black mb-2 font-bold">
-                On Jump process
-              </div>
-              <MonacoEditor
-                className="flex-shrink-0"
-                width="100%"
-                height="200"
-                theme="vs-dark"
-                value={form.onJumpProcess}
-                options={{
-                  readOnly: false,
-                  selectOnLineNumbers: true,
-                }}
-                onChange={(v) => {
-                  form.onJumpProcess = v;
-                  setForm((prev) => {
-                    return {
-                      ...prev,
-                    };
-                  });
-                }}
-                editorDidMount={(editor) => {
-                  setTimeout(() => {
-                    editor.layout();
-                  }, 0);
-                }}
-              />
+              <div className="flex block">
+                <div className="flex flex-col flex-grow">
+                  <div className="text-md text-black mb-2 font-bold flex">
+                    On Jump process
+                  </div>
+                  <MonacoEditor
+                    className="flex-shrink-0"
+                    width="100%"
+                    height="200"
+                    theme="vs-dark"
+                    value={form.onJumpProcess}
+                    options={{
+                      readOnly: false,
+                      selectOnLineNumbers: true,
+                    }}
+                    onChange={(v) => {
+                      form.onJumpProcess = v;
+                      setForm((prev) => {
+                        return {
+                          ...prev,
+                        };
+                      });
+                    }}
+                    editorDidMount={(editor) => {
+                      setTimeout(() => {
+                        editor.layout();
+                      }, 0);
+                    }}
+                  />
+                </div>
 
-              <div className="text-md text-black mb-2 font-bold">
-                After Jump process
+                <div className="flex flex-col flex-grow">
+                  <div className="text-md text-black mb-2 font-bold">
+                    After Jump process
+                  </div>
+                  <MonacoEditor
+                    className="flex-shrink-0"
+                    width="100%"
+                    height="200"
+                    theme="vs-dark"
+                    value={form.afterJumpProcess}
+                    options={{
+                      readOnly: false,
+                      selectOnLineNumbers: true,
+                    }}
+                    onChange={(v) => {
+                      form.afterJumpProcess = v;
+                      setForm((prev) => {
+                        return {
+                          ...prev,
+                        };
+                      });
+                    }}
+                    editorDidMount={(editor) => {
+                      setTimeout(() => {
+                        editor.layout();
+                      }, 0);
+                    }}
+                  />
+                </div>
               </div>
-              <MonacoEditor
-                className="flex-shrink-0"
-                width="100%"
-                height="200"
-                theme="vs-dark"
-                value={form.afterJumpProcess}
-                options={{
-                  readOnly: false,
-                  selectOnLineNumbers: true,
-                }}
-                onChange={(v) => {
-                  form.afterJumpProcess = v;
-                  setForm((prev) => {
-                    return {
-                      ...prev,
-                    };
-                  });
-                }}
-                editorDidMount={(editor) => {
-                  setTimeout(() => {
-                    editor.layout();
-                  }, 0);
-                }}
-              />
 
               <div className="text-md text-black my-2 font-bold">
                 Enable check

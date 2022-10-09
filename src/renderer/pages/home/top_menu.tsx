@@ -106,6 +106,14 @@ function TopMenu() {
         >
           Save
         </Item>
+        <Item
+          onClick={() => {
+            StoryProvider.removeUselessTranslations();
+            eventBus.emit(Event.SAVE);
+          }}
+        >
+          Remove useless translations
+        </Item>
         <Separator />
         <Item
           onClick={() => {

@@ -43,67 +43,67 @@ function RootEditDialog() {
       <>
         {form && (
           <div className="w-full flex flex-col p-2 flex-grow overflow-auto">
-            <div className="text-md text-black mb-2 font-bold">
-              On jump process
-            </div>
-            <MonacoEditor
-              className="block flex-shrink-0"
-              width="100%"
-              height="200"
-              theme="vs-dark"
-              value={form.onJumpProcess}
-              language={'python'}
-              options={{
-                readOnly: false,
-                selectOnLineNumbers: true,
-                insertSpaces: true,
-              }}
-              onChange={(v) => {
-                form.onJumpProcess = v;
-                setForm((prev) => {
-                  return {
-                    ...prev,
-                  };
-                });
-              }}
-              editorDidMount={(editor) => {
-                setTimeout(() => {
-                  editor.layout();
-                  editor.focus();
-                }, 0);
-              }}
-            />
+            <div className="flex block">
+              <div className="flex flex-col flex-grow">
+                <div className="text-md text-black mb-2 font-bold flex">
+                  On Jump process
+                </div>
+                <MonacoEditor
+                  className="flex-shrink-0"
+                  width="100%"
+                  height="200"
+                  theme="vs-dark"
+                  value={form.onJumpProcess}
+                  options={{
+                    readOnly: false,
+                    selectOnLineNumbers: true,
+                  }}
+                  onChange={(v) => {
+                    form.onJumpProcess = v;
+                    setForm((prev) => {
+                      return {
+                        ...prev,
+                      };
+                    });
+                  }}
+                  editorDidMount={(editor) => {
+                    setTimeout(() => {
+                      editor.layout();
+                    }, 0);
+                  }}
+                />
+              </div>
 
-            <div className="text-md text-black mb-2 font-bold">
-              After jump process
+              <div className="flex flex-col flex-grow">
+                <div className="text-md text-black mb-2 font-bold">
+                  After Jump process
+                </div>
+                <MonacoEditor
+                  className="flex-shrink-0"
+                  width="100%"
+                  height="200"
+                  theme="vs-dark"
+                  value={form.afterJumpProcess}
+                  options={{
+                    readOnly: false,
+                    selectOnLineNumbers: true,
+                  }}
+                  onChange={(v) => {
+                    form.afterJumpProcess = v;
+                    setForm((prev) => {
+                      return {
+                        ...prev,
+                      };
+                    });
+                  }}
+                  editorDidMount={(editor) => {
+                    setTimeout(() => {
+                      editor.layout();
+                    }, 0);
+                  }}
+                />
+              </div>
             </div>
-            <MonacoEditor
-              className="block flex-shrink-0"
-              width="100%"
-              height="200"
-              theme="vs-dark"
-              value={form.afterJumpProcess}
-              language={'python'}
-              options={{
-                readOnly: false,
-                selectOnLineNumbers: true,
-                insertSpaces: true,
-              }}
-              onChange={(v) => {
-                form.afterJumpProcess = v;
-                setForm((prev) => {
-                  return {
-                    ...prev,
-                  };
-                });
-              }}
-              editorDidMount={(editor) => {
-                setTimeout(() => {
-                  editor.layout();
-                  editor.focus();
-                }, 0);
-              }}
-            />
 
             <div className="flex flex-col flex-grow">
               <div className="text-md text-black my-2 font-bold">
