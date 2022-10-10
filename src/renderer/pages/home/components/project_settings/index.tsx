@@ -196,55 +196,51 @@ function ProjectSettingsDialog() {
             <div className="block p-6 flex flex-col flex-grow">
               <div className="p-2 mb-4 flex-grow flex">
                 <div className="flex flex-col p-2 mr-2 flex-grow">
-                  <div className="h-96  overflow-auto">
+                  <div className="h-96  overflow-auto grid grid-cols-2 gap-4">
                     {form.actors.map((item: any, i: number) => {
                       return (
                         <div
                           className="flex flex-col border rounded-md border-gray-300 p-2 mb-5 items-center"
                           key={i}
                         >
-                          <div className="flex items-center mb-2 w-full">
-                            <div className="flex p-1 items-center flex-grow">
-                              <div className="font-bold text-sm mr-2">id:</div>
-                              <input
-                                className="border rounded-md border-gray-300 p-2 w-40 outline-none"
-                                placeholder="id"
-                                value={item.id}
-                                onChange={(e) => {
-                                  item.id = e.target.value;
-                                  setForm((prev: any) => {
-                                    return {
-                                      ...prev,
-                                    };
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="flex p-1 items-center flex-grow">
-                              <div className="font-bold text-sm mr-2">
-                                Name:
-                              </div>
-                              <input
-                                className="border rounded-md border-gray-300 p-2 w-40 outline-none"
-                                placeholder="name"
-                                value={
-                                  item.nameStr ||
-                                  translations[item.name]?.[currentLang]
-                                }
-                                onChange={(e) => {
-                                  item.nameStr = e.target.value;
-                                  setForm((prev: any) => {
-                                    return {
-                                      ...prev,
-                                    };
-                                  });
-                                }}
-                              />
-                            </div>
+                          <div className="flex p-1 items-center flex-grow">
+                            <div className="font-bold text-sm mr-2">id:</div>
+                            <input
+                              className="border rounded-md border-gray-300 p-2 w-40 outline-none mr-4"
+                              placeholder="id"
+                              value={item.id}
+                              onChange={(e) => {
+                                item.id = e.target.value;
+                                setForm((prev: any) => {
+                                  return {
+                                    ...prev,
+                                  };
+                                });
+                              }}
+                            />
                             <CgRemove
                               className="cursor-pointer text-md"
                               onClick={() => {
                                 form.actors.splice(i, 1);
+                                setForm((prev: any) => {
+                                  return {
+                                    ...prev,
+                                  };
+                                });
+                              }}
+                            />
+                          </div>
+                          <div className="flex p-1 items-center flex-grow">
+                            <div className="font-bold text-sm mr-2">Name:</div>
+                            <input
+                              className="border rounded-md border-gray-300 p-2 w-40 outline-none"
+                              placeholder="name"
+                              value={
+                                item.nameStr ||
+                                translations[item.name]?.[currentLang]
+                              }
+                              onChange={(e) => {
+                                item.nameStr = e.target.value;
                                 setForm((prev: any) => {
                                   return {
                                     ...prev,
@@ -260,7 +256,8 @@ function ProjectSettingsDialog() {
                                 return (
                                   <div className="flex items-center mb-2">
                                     <input
-                                      className="border rounded-md border-gray-300 p-2 flex-grow outline-none mr-4"
+                                      className="border rounded-md border-gray-300 p-2 outline-none mr-4"
+                                      style={{ width: '170px' }}
                                       placeholder="id"
                                       value={p.id}
                                       onChange={(e) => {
