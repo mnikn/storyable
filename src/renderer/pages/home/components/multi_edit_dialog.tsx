@@ -126,9 +126,7 @@ function MultiEditDialog() {
                 set(data.data.extraData, path, val);
               });
               setForm((prev) => {
-                return {
-                  ...prev,
-                };
+                return [...prev];
               });
             }}
           />
@@ -137,6 +135,7 @@ function MultiEditDialog() {
         <div className="text-sm font-bold mt-6 mb-3">Object fields:</div>
         <Select
           className="text-sm block outline-none cursor-pointer w-full mb-4"
+          clearable
           value={
             objectSelectConfig.find(
               (k) => k.value === selectedObjectField
@@ -176,17 +175,17 @@ function MultiEditDialog() {
           type="button"
           className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
           onClick={() => {
-            const objectVal = JSON.parse(objectFieldValue);
-            form.forEach((data) => {
-              set(data.data.extraData, selectedObjectField, objectVal);
-            });
+            if (selectedObjectField) {
+              const objectVal = JSON.parse(objectFieldValue);
+              form.forEach((data) => {
+                set(data.data.extraData, selectedObjectField, objectVal);
+              });
+            }
             form.forEach((data) => {
               StoryProvider.updateStoryletNode(data);
             });
             setForm((prev) => {
-              return {
-                ...prev,
-              };
+              return [...prev];
             });
             setOpen(false);
             eventBus.emit(Event.CLOSE_DIALOG);
