@@ -14,6 +14,7 @@ import {
 } from 'renderer/models/storylet';
 import StoryProvider from 'renderer/services/story_provider';
 import useEventState from 'renderer/utils/use_event_state';
+import { CgMoreAlt } from 'react-icons/cg';
 import eventBus, { Event } from '../event';
 import ExtraDataPanel from './extra_data/extra_data_panel';
 import FieldSelect from './extra_data/field/select_field';
@@ -63,6 +64,7 @@ function SentenceEditDialog() {
     event: StoryProvider.event,
     initialVal: StoryProvider.projectSettings,
   });
+  const [contentSpeedEditVisible, setContentSpeedEditVisible] = useState(false);
 
   useEffect(() => {
     const showDialog = (data: StoryletSentenceNode) => {
@@ -234,23 +236,33 @@ function SentenceEditDialog() {
             </div>
             <div className="block mb-5">
               <div className="text-md text-black mb-2 font-bold">Content</div>
-              <textarea
-                autoFocus
-                className="resize-none text-md font-normal w-full h-32 outline-none border border-gray-300 rounded-md p-4 focus:ring-blue-500 focus:border-blue-500"
-                style={{ background: 'none' }}
-                value={form.content}
-                onChange={(e) => {
-                  setForm((prev) => {
-                    if (!prev) {
-                      return prev;
-                    }
-                    return {
-                      ...prev,
-                      content: e.target.value,
-                    };
-                  });
-                }}
-              />
+              <div className="flex items-center">
+                <textarea
+                  autoFocus
+                  className="resize-none text-md font-normal w-full h-32 outline-none border border-gray-300 rounded-md p-4 focus:ring-blue-500 focus:border-blue-500 mr-2 mb-2"
+                  style={{ background: 'none' }}
+                  value={form.content}
+                  onChange={(e) => {
+                    setForm((prev) => {
+                      if (!prev) {
+                        return prev;
+                      }
+                      return {
+                        ...prev,
+                        content: e.target.value,
+                      };
+                    });
+                  }}
+                />
+                <button
+                  className="border border-gray-300 hover:text-gray-400 p-2 border-dashed transition-all flex items-center justify-center rounded"
+                  onClick={() => {
+                    setContentSpeedEditVisible(true);
+                  }}
+                >
+                  <CgMoreAlt />
+                </button>
+              </div>
             </div>
 
             <div className="flex block">
@@ -324,6 +336,7 @@ function SentenceEditDialog() {
                 width="100%"
                 height="200"
                 theme="vs-dark"
+                language="plaintext"
                 value={form.enableCheck}
                 options={{
                   readOnly: false,
@@ -386,6 +399,65 @@ function SentenceEditDialog() {
             Cancel
           </button>
         </div>
+
+        {contentSpeedEditVisible && form && (
+          <Dialog
+            open
+            onClose={() => {
+              setContentSpeedEditVisible(false);
+            }}
+            style={{
+              width: '700px',
+              border: '2px solid #2c2c2c',
+              borderTop: '1px solid #2c2c2c',
+            }}
+          >
+            <div className="text-md text-black mb-2 font-bold">
+              Content Speed
+            </div>
+            <div className="flex flex-wrap">
+              {form.content.split('').map((item, i) => {
+                return (
+                  <div className="flex flex-col mb-4 mr-10">
+                    <div className="border rounded p-4 mb-2">{item}</div>
+                    <input
+                      className="border p-2 rouned w-16 outline-none"
+                      type="number"
+                      step="0.01"
+                      value={
+                        form.contentSpeed[StoryProvider.currentLang]?.[i] || 1
+                      }
+                      onChange={(e) => {
+                        setForm((prev) => {
+                          if (!prev) {
+                            return prev;
+                          }
+                          if (!prev.contentSpeed[currentLang]) {
+                            prev.contentSpeed[currentLang] = [];
+                          }
+                          prev.contentSpeed[currentLang][i] = Number(
+                            e.target.value
+                          );
+                          return { ...prev };
+                        });
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center mt-3 justify-center">
+              <button
+                className="border rounded-md shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-800 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                onClick={() => {
+                  setContentSpeedEditVisible(false);
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </Dialog>
+        )}
       </>
     );
   }
@@ -402,41 +474,43 @@ function SentenceEditDialog() {
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => {
-        setOpen(false);
-      }}
-      title="Edit sentence"
-    >
-      <div className="w-full flex flex-col p-2" style={{ height: '650px' }}>
-        <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400 mb-5">
-          {Object.values(Tab).map((key) => {
-            return (
-              <li
-                className="mr-2"
-                key={key}
-                onClick={() => {
-                  setCurrentTab(key);
-                }}
-              >
-                <div
-                  className={classNames(
-                    'inline-block p-4 text-gray-600 rounded-t-lg active dark:bg-gray-800 dark:text-blue-500 outline-none cursor-pointer',
-                    {
-                      'bg-gray-100 font-bold': currentTab === key,
-                    }
-                  )}
+    <>
+      <Dialog
+        open={open}
+        onClose={() => {
+          setOpen(false);
+        }}
+        title="Edit sentence"
+      >
+        <div className="w-full flex flex-col p-2" style={{ height: '650px' }}>
+          <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400 mb-5">
+            {Object.values(Tab).map((key) => {
+              return (
+                <li
+                  className="mr-2"
+                  key={key}
+                  onClick={() => {
+                    setCurrentTab(key);
+                  }}
                 >
-                  {key}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        {content}
-      </div>
-    </Dialog>
+                  <div
+                    className={classNames(
+                      'inline-block p-4 text-gray-600 rounded-t-lg active dark:bg-gray-800 dark:text-blue-500 outline-none cursor-pointer',
+                      {
+                        'bg-gray-100 font-bold': currentTab === key,
+                      }
+                    )}
+                  >
+                    {key}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          {content}
+        </div>
+      </Dialog>
+    </>
   );
 }
 

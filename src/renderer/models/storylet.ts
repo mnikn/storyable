@@ -51,6 +51,7 @@ export class StoryletRootNode extends StoryletNode<StoryletRootNodeData> {
 // sentence node
 export interface StoryletSentenceNodeData extends StoryletNodeData {
   content: string;
+  contentSpeed: { [key: string]: number[] };
   actor: string | null;
   actorDirection?: string;
   actorPortrait: string | null;
@@ -61,6 +62,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
     this.data = {
       type: NodeType.Sentence,
       content: 'content_' + generateUUID(),
+      contentSpeed: {},
       enableConditions: [],
       onJumpProcess: '',
       extraData: {},
@@ -74,6 +76,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
     const instance = new StoryletSentenceNode();
     instance.id = json.id;
     instance.data.content = json.data.content;
+    instance.data.contentSpeed = json.data.contentSpeed || {};
     instance.data.enableConditions = json.data.enableConditions;
     instance.data.extraData = json.data.extraData || {};
     instance.data.actor = json.data.actor;
@@ -90,6 +93,7 @@ export class StoryletSentenceNode extends StoryletNode<StoryletSentenceNodeData>
 // branch node
 export interface StoryletBranchNodeData extends StoryletNodeData {
   content: string;
+  contentSpeed: { [key: string]: number[] };
   actor: string | null;
   actorPortrait: string | null;
   actorDirection?: string;
@@ -100,6 +104,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
     this.data = {
       type: NodeType.Branch,
       content: 'content_' + generateUUID(),
+      contentSpeed: {},
       onJumpProcess: '',
       enableConditions: [],
       extraData: {},
@@ -113,6 +118,7 @@ export class StoryletBranchNode extends StoryletNode<StoryletBranchNodeData> {
     const instance = new StoryletBranchNode();
     instance.id = json.id;
     instance.data.content = json.data.content;
+    instance.data.contentSpeed = json.data.contentSpeed || {};
     instance.data.enableConditions = json.data.enableConditions;
     instance.data.extraData = json.data.extraData || {};
     instance.data.actor = json.data.actor;

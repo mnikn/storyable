@@ -8,12 +8,14 @@ function Dialog({
   onClose,
   title,
   width,
+  style,
 }: {
   open: boolean;
   children: React.ReactNode;
   onClose: () => void;
   title?: string;
   width?: number;
+  style?: React.CSSProperties;
 }) {
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -45,6 +47,7 @@ function Dialog({
                 className="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 w-3/6"
                 style={{
                   width,
+                  ...style,
                 }}
               >
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-2">

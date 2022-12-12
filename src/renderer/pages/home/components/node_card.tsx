@@ -307,7 +307,7 @@ function NodeCard({
             setShowPopup(false);
           }}
         >
-          {currentStorylet.name}({nodeData.data.extraData.storylet_id})
+          {nodeData.data.extraData.storylet_id || currentStorylet.name}
           <NodeActionMenu
             visible={isSelecting && !dragingNode}
             sourceNode={nodeData}

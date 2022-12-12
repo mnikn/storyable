@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import sortBy from 'lodash/sortBy';
 import { useEffect, useState } from 'react';
 import {
   Menu,
@@ -146,7 +147,10 @@ function StoryletItem({
       }}
     >
       <CgFile className="mr-4 p-0.5 text-xl" />
-      <div>{storylet.name}</div>
+      <div>
+        {Object.values(storylet.nodes).find((item) => item.data.type === 'root')
+          ?.data?.extraData?.storylet_id || storylet.name}
+      </div>
     </div>
   );
 }
@@ -178,9 +182,20 @@ function TreeItem({
   const currentGroupStorylets = (storylets || []).filter(
     (item) => item.group.id === group.id
   );
+
+  const currentStorylets = sortBy(currentGroupStorylets, (s1) => {
+    const n1 =
+      Object.values(s1.data.nodes).find((item) => item.data.type === 'root')
+        ?.data?.extraData?.storylet_id || s1.data.name;
+    return n1;
+  });
+
+  const groupItems = sortBy(group.children, (g1) => {
+    return g1.name.charCodeAt(0);
+  });
   return (
     <div
-      className="flex flex-col select-none	"
+      className="flex flex-col select-none"
       style={{ marginLeft: `${level * 15}px` }}
       onContextMenu={(e) => {
         e.stopPropagation();
@@ -198,7 +213,7 @@ function TreeItem({
         <div>{group.name}</div>
       </div>
       {expanded &&
-        group.children.map((g2) => {
+        groupItems.map((g2) => {
           return (
             <TreeItem
               key={g2.id}
@@ -211,7 +226,7 @@ function TreeItem({
           );
         })}
       {expanded &&
-        currentGroupStorylets.map((s) => {
+        currentStorylets.map((s) => {
           return (
             <StoryletItem
               key={s.data.id}
@@ -302,29 +317,33 @@ function Sidebar() {
         />
       </div>
       <div className="flex-grow w-full overflow-auto">
-        {(groups || []).map((group) => {
-          return (
-            <TreeItem
-              key={group.id}
-              group={group}
-              level={0}
-              expandedInfo={expandedInfo}
-              toggleExpaned={(g) => {
-                setExpandedInfo((prev) => {
-                  return {
-                    ...prev,
-                    [g.id]: !prev[g.id],
-                  };
-                });
-              }}
-              showContextMenu={(e, type, item) => {
-                showMenu(e);
-                setMenuTriggeredItem(item);
-                setMenuType(type);
-              }}
-            />
-          );
-        })}
+        {(groups || [])
+          .sort((g1, g2) => {
+            return g1.name.charCodeAt(0) - g2.name.charCodeAt(0);
+          })
+          .map((group) => {
+            return (
+              <TreeItem
+                key={group.id}
+                group={group}
+                level={0}
+                expandedInfo={expandedInfo}
+                toggleExpaned={(g) => {
+                  setExpandedInfo((prev) => {
+                    return {
+                      ...prev,
+                      [g.id]: !prev[g.id],
+                    };
+                  });
+                }}
+                showContextMenu={(e, type, item) => {
+                  showMenu(e);
+                  setMenuTriggeredItem(item);
+                  setMenuType(type);
+                }}
+              />
+            );
+          })}
       </div>
       <Menu id={MENU_ID}>
         {menuType === 'group' && (
@@ -338,7 +357,9 @@ function Sidebar() {
             >
               New storylet
             </Item>
-            {menuTriggeredItem?.id !== (groups || [])[0]?.id && (
+            {menuTriggeredItem?.id !==
+              (groups || []).find((item) => item.name === 'uncategorized')
+                ?.id && (
               <>
                 <Separator />
                 <Item
@@ -354,7 +375,8 @@ function Sidebar() {
             )}
           </>
         )}
-        {menuTriggeredItem?.id !== (groups || [])[0]?.id && (
+        {menuTriggeredItem?.id !==
+          (groups || []).find((item) => item.name === 'uncategorized')?.id && (
           <>
             <Item
               onClick={() => {
